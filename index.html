@@ -1,0 +1,61 @@
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#7c3aed" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HairyWallet" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" />
+    
+    <title>HairyPetShop - Tu tienda de confianza para mascotas</title>
+    <meta name="description" content="HairyPetShop - Productos de calidad para el cuidado y bienestar de tu mascota. Sistema automático inteligente con IA." />
+    <meta name="keywords" content="mascotas, perros, gatos, productos para mascotas, tienda online, veterinarios, automatización IA" />
+    
+    <!-- Remix Icon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registrado'))
+            .catch(err => console.log('Error al registrar SW:', err));
+        });
+      }
+    </script>
+    
+    <!-- Readdy Agent Widget -->
+    <script 
+      src="https://readdy.ai/api/public/assistant/widget?projectId=4f7b79a5-439d-464c-b140-ecf004668ba2"
+      mode="hybrid"
+      voice-show-transcript="true"
+      theme="light"
+      size="compact"
+      accent-color="#14B8A6"
+      button-base-color="#000000"
+      button-accent-color="#FFFFFF"
+      defer
+    ></script>
+  </body>
+</html>

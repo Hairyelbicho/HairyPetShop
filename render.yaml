@@ -1,0 +1,110 @@
+# render.yaml
+services:
+  # Servicio principal n8n (24/7)
+  - type: web
+    name: n8n-hairypetshop
+    env: docker
+    plan: starter
+    region: frankfurt
+    autoDeploy: true
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: bash -lc "n8n start"
+    healthCheckPath: /healthz
+    disk:
+      name: n8n-data
+      mountPath: /home/node/.n8n
+      sizeGB: 5
+    envVars:
+      - key: N8N_HOST
+        value: n8n-hairypetshop.onrender.com
+      - key: WEBHOOK_URL
+        value: https://n8n-hairypetshop.onrender.com
+      - key: N8N_PORT
+        value: "5678"
+      - key: GENERIC_TIMEZONE
+        value: Europe/Madrid
+      - key: NODE_ENV
+        value: production
+
+      # ====== Mensajería ======
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: SLACK_BOT_TOKEN
+        sync: false
+      - key: WHATSAPP_PROVIDER
+        value: twilio
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+
+      # ====== IA ======
+      - key: SIMAI_API_KEY
+        sync: false
+      - key: OLLAMA_HOST
+        value: http://ollama:11434
+      - key: OLLAMA_MODEL
+        value: llama3:instruct
+
+      # ====== Datos ======
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      # ====== Syncee ======
+      - key: SYNCEE_API_KEY
+        sync: false
+      - key: SYNCEE_STORE_ID
+        sync: false
+      - key: SYNCEE_WEBHOOK_SECRET
+        sync: false
+      - key: SYNCEE_SUPPLIER_ID
+        sync: false
+
+      # ====== Gmail ======
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+
+  # Servicio auxiliar (endpoints de utilidad)
+  - type: web
+    name: hairy-utils
+    env: docker
+    plan: free
+    region: frankfurt
+    autoDeploy: true
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: bash -lc "node /opt/app/server.js"
+    healthCheckPath: /healthz
+    envVars:
+      - key: UTILS_PORT
+        value: "8080"
+      - key: N8N_WEBHOOK_URL
+        value: https://n8n-hairypetshop.onrender.com
+
+cronJobs:
+  # Ping de salud
+  - name: hairy-health-ping
+    schedule: "*/15 * * * *"
+    env: docker
+    dockerCommand: >
+      bash -lc "apk add --no-cache curl || true; 
+      curl -fsS https://n8n-hairypetshop.onrender.com/healthz || exit 1"
+
+  # Generador de contenido diario
+  - name: hairy-content-daily
+    schedule: "0 8 * * *"
+    env: docker
+    dockerCommand: >
+      bash -lc "apk add --no-cache curl || true; 
+      curl -X POST -fsS https://n8n-hairypetshop.onrender.com/webhook/hairy-content || true"

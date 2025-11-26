@@ -1,0 +1,94 @@
+{
+  "name": "HairyWallet - Solana Wallet",
+  "short_name": "HairyWallet",
+  "description": "Tu wallet de Solana para el ecosistema Hairy. Gestiona tus criptomonedas de forma segura.",
+  "start_url": "/hairy-wallet",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#7c3aed",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "utilities", "productivity"],
+  "screenshots": [
+    {
+      "src": "https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Crear Wallet",
+      "short_name": "Crear",
+      "description": "Crear una nueva wallet de Solana",
+      "url": "/hairy-wallet/crear",
+      "icons": [
+        {
+          "src": "https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Importar Wallet",
+      "short_name": "Importar",
+      "description": "Importar wallet existente",
+      "url": "/hairy-wallet/importar",
+      "icons": [
+        {
+          "src": "https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Enviar",
+      "short_name": "Enviar",
+      "description": "Enviar criptomonedas",
+      "url": "/hairy-wallet/enviar",
+      "icons": [
+        {
+          "src": "https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Recibir",
+      "short_name": "Recibir",
+      "description": "Recibir criptomonedas",
+      "url": "/hairy-wallet/recibir",
+      "icons": [
+        {
+          "src": "https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/hairy-wallet/enviar",
+    "method": "GET",
+    "params": {
+      "title": "address",
+      "text": "amount"
+    }
+  }
+}

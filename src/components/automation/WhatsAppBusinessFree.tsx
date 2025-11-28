@@ -1,443 +1,285 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from "react";
 
-interface WhatsAppLead {
-  id: string;
-  name: string;
-  phone: string;
+type Channel = "telegram" | "discord";
+
+type TestState = {
+  loading: boolean;
+  ok: boolean | null;
   message: string;
-  product?: string;
-  timestamp: Date;
-  status: 'new' | 'contacted' | 'converted' | 'lost';
-  source: string;
-}
+};
 
-interface MessageTemplate {
-  id: string;
-  name: string;
-  trigger: string;
-  message: string;
-  category: 'welcome' | 'product' | 'follow_up' | 'closing';
-}
+const N8N_ENDPOINTS: Record<Channel, string> = {
+  telegram: import.meta.env.VITE_N8N_TELEGRAM_WEBHOOK ?? "",
+  discord: import.meta.env.VITE_N8N_DISCORD_WEBHOOK ?? "",
+};
 
-export default function WhatsAppBusinessFree() {
-  const [leads, setLeads] = useState<WhatsAppLead[]>([]);
-  const [templates, setTemplates] = useState<MessageTemplate[]>([
-    {
-      id: '1',
-      name: 'Bienvenida General',
-      trigger: 'nuevo_visitante',
-      message: '¡Hola! 👋 Bienvenido a PetStore. Veo que buscas productos para tu mascota. ¿En qué puedo ayudarte? Tenemos ofertas especiales hoy 🐾',
-      category: 'welcome'
-    },
-    {
-      id: '2',
-      name: 'Interés en Producto',
-      trigger: 'producto_visto',
-      message: '¡Hola! 😊 Vi que te interesa [PRODUCTO]. Es uno de nuestros más populares. ¿Te gustaría conocer más detalles o tienes alguna pregunta específica?',
-      category: 'product'
-    },
-    {
-      id: '3',
-      name: 'Seguimiento 24h',
-      trigger: 'seguimiento_24h',
-      message: '¡Hola de nuevo! 🐕 ¿Pudiste revisar la información que te envié ayer? Si tienes alguna duda sobre [PRODUCTO], estoy aquí para ayudarte.',
-      category: 'follow_up'
-    },
-    {
-      id: '4',
-      name: 'Cierre de Venta',
-      trigger: 'cierre_venta',
-      message: '¡Perfecto! 🎉 Para proceder con tu pedido de [PRODUCTO], necesito confirmar: ¿Cuál es tu dirección de envío? El pago lo puedes hacer por transferencia o en efectivo contra entrega.',
-      category: 'closing'
-    }
-  ]);
-  
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const [customMessage, setCustomMessage] = useState<string>('');
-  const [isMonitoring, setIsMonitoring] = useState(true);
-  const [todayStats, setTodayStats] = useState({
-    leads: 0,
-    messages: 0,
-    conversions: 0,
-    revenue: 0
+const WhatsAppBusinessFree: React.FC = () => {
+  const [telegramState, setTelegramState] = useState<TestState>({
+    loading: false,
+    ok: null,
+    message: "",
   });
 
-  const whatsappNumber = "+34744403191";
+  const [discordState, setDiscordState] = useState<TestState>({
+    loading: false,
+    ok: null,
+    message: "",
+  });
 
-  // Simular detección de leads automática
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Math.random() > 0.85 && isMonitoring) { // 15% probabilidad cada 30 segundos
-        generateNewLead();
-      }
-    }, 30000);
+  const handleTest = async (channel: Channel) => {
+    const endpoint = N8N_ENDPOINTS[channel];
 
-    return () => clearInterval(interval);
-  }, [isMonitoring]);
+    const setState =
+      channel === "telegram" ? setTelegramState : setDiscordState;
 
-  const generateNewLead = () => {
-    const leadSources = ['web_visit', 'product_view', 'cart_abandon', 'search'];
-    const products = ['Collar Premium', 'Juguete Interactivo', 'Pienso Premium', 'Cama Ortopédica'];
-    const names = ['María G.', 'Carlos L.', 'Ana M.', 'José R.', 'Laura S.'];
-    
-    const newLead: WhatsAppLead = {
-      id: Date.now().toString(),
-      name: names[Math.floor(Math.random() * names.length)],
-      phone: '+34' + Math.floor(Math.random() * 900000000 + 100000000),
-      message: 'Visitante detectado automáticamente',
-      product: products[Math.floor(Math.random() * products.length)],
-      timestamp: new Date(),
-      status: 'new',
-      source: leadSources[Math.floor(Math.random() * leadSources.length)]
-    };
-
-    setLeads(prev => [newLead, ...prev.slice(0, 19)]);
-    setTodayStats(prev => ({ ...prev, leads: prev.leads + 1 }));
-
-    // Mostrar notificación
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('🔔 Nuevo Lead Detectado', {
-        body: `${newLead.name} está interesado en ${newLead.product}`,
-        icon: 'https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png'
+    if (!endpoint) {
+      setState({
+        loading: false,
+        ok: false,
+        message:
+          "⚠️ Falta configurar la URL del webhook de n8n en las variables de entorno.",
       });
-    }
-
-    console.log('🎯 Nuevo lead detectado:', newLead);
-  };
-
-  const sendWhatsAppMessage = (lead: WhatsAppLead, templateId?: string) => {
-    let message = customMessage;
-    
-    if (templateId) {
-      const template = templates.find(t => t.id === templateId);
-      if (template) {
-        message = template.message.replace('[PRODUCTO]', lead.product || 'nuestros productos');
-      }
-    }
-
-    if (!message.trim()) {
-      alert('Por favor, selecciona una plantilla o escribe un mensaje personalizado.');
       return;
     }
 
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${lead.phone.replace('+', '')}?text=${encodedMessage}`;
-    
-    window.open(whatsappUrl, '_blank');
+    setState({ loading: true, ok: null, message: "" });
 
-    // Actualizar estado del lead
-    setLeads(prev => prev.map(l => 
-      l.id === lead.id 
-        ? { ...l, status: 'contacted' }
-        : l
-    ));
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "test",
+          channel,
+          source: "HairyPetShop",
+          message: `Test de integración desde HairyShop (${channel})`,
+        }),
+      });
 
-    setTodayStats(prev => ({ ...prev, messages: prev.messages + 1 }));
-    setCustomMessage('');
-    setSelectedTemplate('');
+      if (!res.ok) {
+        throw new Error(`n8n devolvió ${res.status}`);
+      }
 
-    console.log('📱 Mensaje enviado por WhatsApp:', { lead: lead.name, message });
-  };
-
-  const markAsConverted = (leadId: string) => {
-    setLeads(prev => prev.map(l => 
-      l.id === leadId 
-        ? { ...l, status: 'converted' }
-        : l
-    ));
-
-    setTodayStats(prev => ({ 
-      ...prev, 
-      conversions: prev.conversions + 1,
-      revenue: prev.revenue + (Math.random() * 50 + 20) // Simular venta
-    }));
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'new': return 'bg-blue-100 text-blue-800';
-      case 'contacted': return 'bg-yellow-100 text-yellow-800';
-      case 'converted': return 'bg-green-100 text-green-800';
-      case 'lost': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      setState({
+        loading: false,
+        ok: true,
+        message: "✅ Test enviado correctamente. Revisa tu flujo en n8n.",
+      });
+    } catch (error: any) {
+      console.error(error);
+      setState({
+        loading: false,
+        ok: false,
+        message:
+          "❌ Error al llamar al webhook de n8n. Revisa la URL y que el workflow esté activo.",
+      });
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'new': return 'Nuevo';
-      case 'contacted': return 'Contactado';
-      case 'converted': return 'Convertido';
-      case 'lost': return 'Perdido';
-      default: return 'Desconocido';
-    }
+  const renderStatus = (state: TestState) => {
+    if (state.ok === null && !state.message) return null;
+
+    const color =
+      state.ok === null
+        ? "text-gray-200"
+        : state.ok
+        ? "text-emerald-300"
+        : "text-red-300";
+
+    return <p className={`text-xs mt-2 ${color}`}>{state.message}</p>;
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <i className="ri-whatsapp-line text-2xl"></i>
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold">📱 WhatsApp Business GRATIS</h3>
-              <p className="text-green-100">Versión gratuita - Perfecto para empezar</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <div className={`w-3 h-3 rounded-full ${isMonitoring ? 'bg-green-300 animate-pulse' : 'bg-red-300'}`}></div>
-            <span className="text-sm font-medium">
-              {isMonitoring ? 'Monitoreando' : 'Pausado'}
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-            <div className="text-2xl font-bold">{todayStats.leads}</div>
-            <div className="text-green-100 text-sm">Leads Hoy</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-            <div className="text-2xl font-bold">{todayStats.messages}</div>
-            <div className="text-green-100 text-sm">Mensajes Enviados</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-            <div className="text-2xl font-bold">{todayStats.conversions}</div>
-            <div className="text-green-100 text-sm">Conversiones</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-            <div className="text-2xl font-bold">€{todayStats.revenue.toFixed(2)}</div>
-            <div className="text-green-100 text-sm">Ingresos</div>
-          </div>
-        </div>
+    <div className="space-y-8">
+      {/* Header principal */}
+      <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-emerald-500 rounded-2xl p-6 text-white shadow-xl border border-white/10">
+        <h1 className="text-2xl font-bold mb-2">
+          Automatización con Telegram & Discord
+        </h1>
+        <p className="text-sm text-purple-100 max-w-2xl">
+          Aquí sustituyes el antiguo sistema de WhatsApp de Readdy por tu propia
+          automatización real con <strong>n8n + Telegram + Discord</strong>,
+          gestionada por tu ecosistema Hairy. Sin costes por mensaje, sin
+          bloqueos de terceros.
+        </p>
       </div>
 
-      {/* Control Panel */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h4 className="text-lg font-semibold text-gray-900">🎛️ Panel de Control</h4>
+      {/* Configuración general */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Telegram */}
+        <div className="bg-white/5 rounded-2xl border border-white/10 p-5 backdrop-blur">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                <i className="ri-telegram-fill text-xl text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-white">
+                  Canal de ventas: Telegram
+                </h2>
+                <p className="text-xs text-emerald-100">
+                  Bot de soporte, ventas y notificaciones de pedidos.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <ol className="list-decimal list-inside text-xs text-emerald-50 space-y-1 mb-4">
+            <li>
+              Crea o usa tu Bot de Telegram con{" "}
+              <span className="font-mono">@BotFather</span>.
+            </li>
+            <li>
+              En n8n, crea un workflow con un nodo{" "}
+              <span className="font-mono">Webhook</span> de entrada.
+            </li>
+            <li>
+              Copia la URL del webhook de n8n en{" "}
+              <span className="font-mono">
+                VITE_N8N_TELEGRAM_WEBHOOK
+              </span>{" "}
+              (archivo <span className="font-mono">.env</span>).
+            </li>
+            <li>
+              Añade un nodo de Telegram (Send Message) apuntando a tu bot y a
+              tu chat/canal de ventas.
+            </li>
+          </ol>
+
           <button
-            onClick={() => setIsMonitoring(!isMonitoring)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
-              isMonitoring 
-                ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                : 'bg-green-100 text-green-700 hover:bg-green-200'
-            }`}
+            type="button"
+            onClick={() => handleTest("telegram")}
+            disabled={telegramState.loading}
+            className="inline-flex items-center px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-500 text-white text-sm font-semibold transition-colors cursor-pointer"
           >
-            {isMonitoring ? 'Pausar Monitoreo' : 'Iniciar Monitoreo'}
+            {telegramState.loading ? (
+              <>
+                <i className="ri-loader-4-line animate-spin mr-2" />
+                Enviando test a Telegram...
+              </>
+            ) : (
+              <>
+                <i className="ri-send-plane-fill mr-2" />
+                Enviar mensaje de prueba a Telegram
+              </>
+            )}
           </button>
+
+          {renderStatus(telegramState)}
+
+          {!N8N_ENDPOINTS.telegram && (
+            <p className="text-[11px] text-yellow-300 mt-3">
+              ⚠️ No se ha detectado{" "}
+              <span className="font-mono">VITE_N8N_TELEGRAM_WEBHOOK</span>.  
+              Añádelo en tu archivo <span className="font-mono">.env</span> para
+              activar este canal.
+            </p>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h5 className="font-medium text-gray-900 mb-3">📋 Plantillas de Mensajes</h5>
-            <div className="space-y-2">
-              {templates.map((template) => (
-                <button
-                  key={template.id}
-                  onClick={() => {
-                    setSelectedTemplate(template.id);
-                    setCustomMessage(template.message);
-                  }}
-                  className={`w-full text-left p-3 rounded-lg border transition-colors cursor-pointer ${
-                    selectedTemplate === template.id
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200 hover:border-green-300'
-                  }`}
-                >
-                  <div className="font-medium text-gray-900">{template.name}</div>
-                  <div className="text-sm text-gray-600">{template.trigger}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h5 className="font-medium text-gray-900 mb-3">✏️ Mensaje Personalizado</h5>
-            <textarea
-              value={customMessage}
-              onChange={(e) => setCustomMessage(e.target.value)}
-              placeholder="Escribe tu mensaje personalizado aquí..."
-              className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
-            />
-            <div className="mt-2 text-sm text-gray-600">
-              Usa [PRODUCTO] para insertar el nombre del producto automáticamente
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Leads List */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h4 className="text-lg font-semibold text-gray-900">🎯 Leads Detectados</h4>
-            <button
-              onClick={generateNewLead}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
-            >
-              Simular Lead
-            </button>
-          </div>
-        </div>
-
-        <div className="divide-y divide-gray-200">
-          {leads.length === 0 ? (
-            <div className="p-8 text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-user-search-line text-2xl text-gray-400"></i>
+        {/* Discord */}
+        <div className="bg-white/5 rounded-2xl border border-white/10 p-5 backdrop-blur">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center">
+                <i className="ri-discord-fill text-xl text-white" />
               </div>
-              <h5 className="text-lg font-medium text-gray-900 mb-2">Esperando leads...</h5>
-              <p className="text-gray-600">Los visitantes interesados aparecerán aquí automáticamente</p>
-            </div>
-          ) : (
-            leads.map((lead) => (
-              <div key={lead.id} className="p-6 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <i className="ri-user-line text-green-600 text-xl"></i>
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900">{lead.name}</div>
-                      <div className="text-sm text-gray-600">{lead.phone}</div>
-                      <div className="text-xs text-gray-500">
-                        {lead.timestamp.toLocaleString('es-ES')} • {lead.source}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(lead.status)}`}>
-                      {getStatusText(lead.status)}
-                    </span>
-                  </div>
-                </div>
-
-                {lead.product && (
-                  <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                    <div className="text-sm font-medium text-blue-900">Producto de interés:</div>
-                    <div className="text-sm text-blue-700">{lead.product}</div>
-                  </div>
-                )}
-
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => sendWhatsAppMessage(lead, selectedTemplate)}
-                    disabled={lead.status === 'converted'}
-                    className="bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap flex items-center space-x-2"
-                  >
-                    <i className="ri-whatsapp-line"></i>
-                    <span>Enviar WhatsApp</span>
-                  </button>
-
-                  {lead.status === 'contacted' && (
-                    <button
-                      onClick={() => markAsConverted(lead.id)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
-                    >
-                      Marcar como Venta
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() => {
-                      const directUrl = `https://wa.me/${lead.phone.replace('+', '')}`;
-                      window.open(directUrl, '_blank');
-                    }}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
-                  >
-                    Chat Directo
-                  </button>
-                </div>
+              <div>
+                <h2 className="text-lg font-semibold text-white">
+                  Canal de comunidad: Discord
+                </h2>
+                <p className="text-xs text-indigo-100">
+                  Alertas de ventas, comunidad Hairy y panel interno.
+                </p>
               </div>
-            ))
+            </div>
+          </div>
+
+          <ol className="list-decimal list-inside text-xs text-indigo-50 space-y-1 mb-4">
+            <li>
+              Crea una aplicación y bot en el{" "}
+              <span className="font-mono">Discord Developer Portal</span>.
+            </li>
+            <li>
+              En n8n, crea otro workflow con un nodo{" "}
+              <span className="font-mono">Webhook</span>.
+            </li>
+            <li>
+              Copia la URL en{" "}
+              <span className="font-mono">VITE_N8N_DISCORD_WEBHOOK</span> en tu{" "}
+              <span className="font-mono">.env</span>.
+            </li>
+            <li>
+              Añade un nodo de Discord (webhook o bot) para publicar el mensaje
+              en tu servidor/canal.
+            </li>
+          </ol>
+
+          <button
+            type="button"
+            onClick={() => handleTest("discord")}
+            disabled={discordState.loading}
+            className="inline-flex items-center px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 disabled:bg-gray-500 text-white text-sm font-semibold transition-colors cursor-pointer"
+          >
+            {discordState.loading ? (
+              <>
+                <i className="ri-loader-4-line animate-spin mr-2" />
+                Enviando test a Discord...
+              </>
+            ) : (
+              <>
+                <i className="ri-send-plane-fill mr-2" />
+                Enviar mensaje de prueba a Discord
+              </>
+            )}
+          </button>
+
+          {renderStatus(discordState)}
+
+          {!N8N_ENDPOINTS.discord && (
+            <p className="text-[11px] text-yellow-300 mt-3">
+              ⚠️ No se ha detectado{" "}
+              <span className="font-mono">VITE_N8N_DISCORD_WEBHOOK</span>.  
+              Añádelo en tu archivo <span className="font-mono">.env</span> para
+              activar este canal.
+            </p>
           )}
         </div>
       </div>
 
-      {/* Setup Guide */}
-      <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6">
-        <div className="flex items-start space-x-4">
-          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-            <i className="ri-guide-line text-white text-xl"></i>
-          </div>
-          <div className="flex-1">
-            <h5 className="font-semibold text-gray-900 mb-2">📚 Guía de Configuración WhatsApp Business GRATIS</h5>
-            <div className="space-y-3 text-sm text-gray-700">
-              <div className="flex items-start space-x-2">
-                <span className="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span>
-                <div>
-                  <strong>Descargar WhatsApp Business:</strong> Instala la app gratuita desde Google Play o App Store
-                </div>
-              </div>
-              <div className="flex items-start space-x-2">
-                <span className="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
-                <div>
-                  <strong>Configurar Perfil:</strong> Añade foto, descripción del negocio y horarios de atención
-                </div>
-              </div>
-              <div className="flex items-start space-x-2">
-                <span className="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span>
-                <div>
-                  <strong>Crear Plantillas:</strong> Guarda las plantillas de mensajes que ves arriba como mensajes rápidos
-                </div>
-              </div>
-              <div className="flex items-start space-x-2">
-                <span className="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">4</span>
-                <div>
-                  <strong>Monitorear Leads:</strong> Usa este panel para detectar visitantes interesados y contactarlos rápidamente
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                const message = '¡Hola! Quiero configurar WhatsApp Business gratis para mi tienda de mascotas. ¿Me ayudas con la configuración paso a paso?';
-                const encodedMessage = encodeURIComponent(message);
-                window.open(`https://wa.me/34744403191?text=${encodedMessage}`, '_blank');
-              }}
-              className="mt-4 bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
-            >
-              Ayuda con Configuración
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Benefits */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">✅ Beneficios de WhatsApp Business Gratis</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center space-x-3">
-            <i className="ri-check-line text-green-500 text-xl"></i>
-            <span className="text-gray-700">Hasta 1,000 conversaciones gratis al mes</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <i className="ri-check-line text-green-500 text-xl"></i>
-            <span className="text-gray-700">Perfil de negocio profesional</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <i className="ri-check-line text-green-500 text-xl"></i>
-            <span className="text-gray-700">Mensajes automáticos de bienvenida</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <i className="ri-check-line text-green-500 text-xl"></i>
-            <span className="text-gray-700">Estadísticas básicas de mensajes</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <i className="ri-check-line text-green-500 text-xl"></i>
-            <span className="text-gray-700">Catálogo de productos integrado</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <i className="ri-check-line text-green-500 text-xl"></i>
-            <span className="text-gray-700">Respuestas rápidas personalizadas</span>
-          </div>
-        </div>
+      {/* Bloque de explicación final */}
+      <div className="bg-black/40 rounded-2xl border border-white/10 p-5 text-xs text-gray-100 space-y-2">
+        <p className="font-semibold text-white mb-1">
+          ¿Qué hemos hecho aquí exactamente?
+        </p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>
+            Eliminado la dependencia de WhatsApp Business / Luna IA / Readdy.
+          </li>
+          <li>
+            Centralizado la automatización en{" "}
+            <strong>n8n + Telegram + Discord</strong>.
+          </li>
+          <li>
+            Este componente solo hace llamadas HTTP a tus webhooks de n8n,
+            donde está la lógica real de:
+            <ul className="list-disc list-inside ml-4 mt-1">
+              <li>Notificaciones de venta</li>
+              <li>Mensajes de bienvenida</li>
+              <li>IA vendedora Hairy</li>
+            </ul>
+          </li>
+        </ul>
+        <p className="text-[11px] text-gray-300 mt-1">
+          Cuando quieras, podemos conectar este panel directamente con el flujo de
+          compra (checkout) para que cada pedido dispare un flujo en n8n que
+          avise a Telegram/Discord y active tu IA vendedora.
+        </p>
       </div>
     </div>
   );
-}
+};
+
+export default WhatsAppBusinessFree;

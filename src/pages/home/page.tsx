@@ -1,149 +1,65 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import StripePayment from '../../components/payments/StripePayment';
+import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, Keypair } from '@solana/web3.js';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('todos');
-  const [showWalletModal, setShowWalletModal] = useState(false);
-  const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
-  const [walletAddress, setWalletAddress] = useState<string>('');
   const [whatsappUrl] = useState(`https://wa.me/34744403191`);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [showStripeModal, setShowStripeModal] = useState(false);
+  const [checkoutProduct, setCheckoutProduct] = useState<any>(null);
+
+  // Store treasury wallet address (replace with actual if needed)
+  const TREASURY_WALLET = "7XF6rG8P3C5Fm9S1g3vA8k6L4N9jB5T2m1qWxP8yK5rN"; 
+
+  useEffect(() => {
+    const savedWallet = localStorage.getItem('hairy_wallet_address');
+    if (savedWallet) {
+      setWalletAddress(savedWallet);
+    }
+  }, []);
 
   const featuredProducts = [
     {
       id: 1,
-      name: "Collar Premium para Perros",
+      name: "Collar Premium para Perros (Cuero)",
       price: 24.99,
       originalPrice: 34.99,
       discount: 29,
       rating: 4.8,
       reviews: 156,
       category: "perros",
-      image: "https://readdy.ai/api/search-image?query=Premium%20leather%20dog%20collar%20with%20metal%20buckle%2C%20high%20quality%20pet%20accessory%2C%20brown%20leather%20collar%20for%20medium%20dogs%2C%20professional%20product%20photography&width=400&height=300&seq=collar1&orientation=landscape"
+      image: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400"
     },
     {
       id: 2,
-      name: "Juguete Interactivo para Gatos",
+      name: "Juguete Interactivo para Gatos (Láser)",
       price: 18.50,
       originalPrice: 25.00,
       discount: 26,
       rating: 4.9,
       reviews: 203,
       category: "gatos",
-      image: "https://readdy.ai/api/search-image?query=Interactive%20cat%20toy%20with%20feathers%20and%20bells%2C%20colorful%20pet%20toy%20for%20indoor%20cats%2C%20engaging%20cat%20entertainment%20product%2C%20clean%20white%20background&width=400&height=300&seq=cattoy1&orientation=landscape"
+      image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400"
     },
     {
       id: 3,
-      name: "Acuario Completo 50L",
+      name: "Acuario Completo 50L con LED",
       price: 89.99,
       originalPrice: 120.00,
       discount: 25,
       rating: 4.7,
       reviews: 89,
       category: "peces",
-      image: "https://readdy.ai/api/search-image?query=Complete%2050%20liter%20aquarium%20tank%20with%20LED%20lighting%2C%20filter%20system%2C%20tropical%20fish%20tank%20setup%2C%20modern%20aquarium%20design&width=400&height=300&seq=aquarium1&orientation=landscape"
+      image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=400"
     },
     {
       id: 4,
-      name: "Jaula Espaciosa para Pájaros",
-      price: 65.00,
-      originalPrice: 85.00,
-      discount: 24,
-      rating: 4.6,
-      reviews: 67,
-      category: "pajaros",
-      image: "https://readdy.ai/api/search-image?query=Large%20bird%20cage%20with%20multiple%20perches%2C%20spacious%20aviary%20for%20parrots%20and%20canaries%2C%20white%20metal%20bird%20cage%20with%20feeding%20bowls%2C%20pet%20store%20quality&width=400&height=300&seq=birdcage1&orientation=landscape"
-    },
-    {
-      id: 5,
-      name: "Arnés Profesional para Caballos",
-      price: 145.00,
-      originalPrice: 180.00,
-      discount: 19,
-      rating: 4.9,
-      reviews: 34,
-      category: "caballos",
-      image: "https://readdy.ai/api/search-image?query=Professional%20horse%20harness%20with%20leather%20straps%2C%20equestrian%20equipment%20for%20training%2C%20brown%20leather%20horse%20tack%2C%20high%20quality%20riding%20gear&width=400&height=300&seq=harness1&orientation=landscape"
-    },
-    {
-      id: 6,
-      name: "Kit Veterinario Básico",
-      price: 78.50,
-      originalPrice: 95.00,
-      discount: 17,
-      rating: 4.8,
-      reviews: 112,
-      category: "veterinarios",
-      image: "https://readdy.ai/api/search-image?query=Veterinary%20medical%20kit%20with%20stethoscope%2C%20thermometer%20and%20basic%20tools%2C%20professional%20vet%20equipment%20set%2C%20medical%20supplies%20for%20pet%20care&width=400&height=300&seq=vetkit1&orientation=landscape"
-    },
-    {
-      id: 7,
-      name: "Cama Ortopédica para Perros",
-      price: 42.99,
-      originalPrice: 55.00,
-      discount: 22,
-      rating: 4.7,
-      reviews: 178,
-      category: "perros",
-      image: "https://readdy.ai/api/search-image?query=Orthopedic%20dog%20bed%20with%20memory%20foam%2C%20comfortable%20pet%20sleeping%20mat%2C%20gray%20fabric%20dog%20bed%20for%20large%20breeds%2C%20supportive%20pet%20furniture&width=400&height=300&seq=dogbed1&orientation=landscape"
-    },
-    {
-      id: 8,
-      name: "Torre Rascador para Gatos",
-      price: 56.00,
-      originalPrice: 75.00,
-      discount: 25,
-      rating: 4.8,
-      reviews: 145,
-      category: "gatos",
-      image: "https://readdy.ai/api/search-image?query=Multi%20level%20cat%20scratching%20tower%20with%20sisal%20rope%2C%20tall%20cat%20tree%20with%20platforms%20and%20hiding%20spots%2C%20beige%20cat%20furniture%20for%20indoor%20cats&width=400&height=300&seq=cattower1&orientation=landscape"
-    },
-    {
-      id: 9,
-      name: "Filtro Avanzado para Acuario",
-      price: 34.99,
-      originalPrice: 45.00,
-      discount: 22,
-      rating: 4.6,
-      reviews: 92,
-      category: "peces",
-      image: "https://readdy.ai/api/search-image?query=Advanced%20aquarium%20filter%20system%20with%20multiple%20stages%2C%20water%20filtration%20equipment%20for%20fish%20tanks%2C%20black%20aquarium%20filter%20with%20tubes&width=400&height=300&seq=filter1&orientation=landscape"
-    },
-    {
-      id: 10,
-      name: "Comedero Automático para Pájaros",
-      price: 28.50,
-      originalPrice: 38.00,
-      discount: 25,
-      rating: 4.5,
-      reviews: 76,
-      category: "pajaros",
-      image: "https://readdy.ai/api/search-image?query=Automatic%20bird%20feeder%20with%20seed%20dispenser%2C%20self%20filling%20bird%20food%20container%2C%20clear%20plastic%20bird%20feeder%20for%20cages&width=400&height=300&seq=birdfeeder1&orientation=landscape"
-    },
-    {
-      id: 11,
-      name: "Manta Térmica para Caballos",
-      price: 98.00,
-      originalPrice: 125.00,
-      discount: 22,
-      rating: 4.7,
-      reviews: 45,
-      category: "caballos",
-      image: "https://readdy.ai/api/search-image?query=Thermal%20horse%20blanket%20for%20winter%2C%20waterproof%20horse%20rug%20with%20straps%2C%20navy%20blue%20equestrian%20blanket%20for%20cold%20weather%20protection&width=400&height=300&seq=horseblanket1&orientation=landscape"
-    },
-    {
-      id: 12,
-      name: "Estetoscopio Veterinario",
-      price: 125.00,
-      originalPrice: 150.00,
-      discount: 17,
-      rating: 4.9,
-      reviews: 67,
-      category: "veterinarios",
-      image: "https://readdy.ai/api/search-image?query=Professional%20veterinary%20stethoscope%20for%20animal%20examination%2C%20medical%20grade%20vet%20stethoscope%20with%20dual%20head%2C%20black%20medical%20instrument&width=400&height=300&seq=stethoscope1&orientation=landscape"
-    },
-    // NUEVOS PRODUCTOS VIRALES
-    {
-      id: 13,
       name: "Arenero Automático Autolimpiable",
       price: 189.99,
       originalPrice: 249.99,
@@ -151,128 +67,73 @@ export default function Home() {
       rating: 4.9,
       reviews: 342,
       category: "gatos",
-      image: "https://readdy.ai/api/search-image?query=Automatic%20self%20cleaning%20cat%20litter%20box%20with%20smart%20sensors%2C%20modern%20white%20automatic%20litter%20box%2C%20robotic%20cat%20toilet%20with%20waste%20drawer%2C%20high%20tech%20pet%20product&width=400&height=300&seq=autolitter1&orientation=landscape"
+      image: "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400"
     },
     {
-      id: 14,
-      name: "Fuente de Agua Inteligente para Mascotas",
-      price: 45.99,
-      originalPrice: 65.00,
-      discount: 29,
+      id: 5,
+      name: "Cama Ortopédica Viscoelástica XXL",
+      price: 55.00,
+      originalPrice: 79.99,
+      discount: 31,
+      rating: 4.9,
+      reviews: 512,
+      category: "perros",
+      image: "https://images.unsplash.com/photo-1541599540903-216a46ca1dc0?w=400"
+    },
+    {
+      id: 6,
+      name: "Dispensador de Comida WiFi con Cámara",
+      price: 75.99,
+      originalPrice: 105.00,
+      discount: 28,
       rating: 4.8,
       reviews: 289,
       category: "perros",
-      image: "https://readdy.ai/api/search-image?query=Smart%20pet%20water%20fountain%20with%20LED%20lights%20and%20filters%2C%20automatic%20water%20dispenser%20for%20cats%20and%20dogs%2C%20modern%20white%20pet%20fountain%20with%20flowing%20water&width=400&height=300&seq=fountain1&orientation=landscape"
+      image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400"
     },
     {
-      id: 15,
-      name: "Comedero Automático con Cámara WiFi",
-      price: 129.99,
-      originalPrice: 179.99,
+      id: 7,
+      name: "Rascador Árbol Gigante para Gatos (170cm)",
+      price: 64.50,
+      originalPrice: 89.90,
       discount: 28,
-      rating: 4.9,
-      reviews: 456,
-      category: "perros",
-      image: "https://readdy.ai/api/search-image?query=Smart%20automatic%20pet%20feeder%20with%20WiFi%20camera%2C%20white%20automatic%20food%20dispenser%20with%20app%20control%2C%20modern%20pet%20feeding%20station%20with%20video%20monitoring&width=400&height=300&seq=smartfeeder1&orientation=landscape"
+      rating: 4.6,
+      reviews: 145,
+      category: "gatos",
+      image: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400"
     },
     {
-      id: 16,
-      name: "GPS Tracker para Mascotas",
-      price: 79.99,
-      originalPrice: 99.99,
-      discount: 20,
+      id: 8,
+      name: "Correa Retráctil con Linterna LED",
+      price: 19.99,
+      originalPrice: 29.99,
+      discount: 33,
       rating: 4.7,
-      reviews: 234,
+      reviews: 402,
       category: "perros",
-      image: "https://readdy.ai/api/search-image?query=GPS%20pet%20tracker%20collar%20attachment%2C%20small%20waterproof%20GPS%20device%20for%20dogs%20and%20cats%2C%20modern%20pet%20location%20tracker%20with%20LED%20light&width=400&height=300&seq=gpstracker1&orientation=landscape"
+      image: "https://images.unsplash.com/photo-1605639156481-244775d6f803?w=400"
     },
     {
-      id: 17,
-      name: "Cepillo Eléctrico Masajeador",
+      id: 9,
+      name: "Jaula Espaciosa para Pájaros (Canarios/Loros)",
+      price: 45.00,
+      originalPrice: 60.00,
+      discount: 25,
+      rating: 4.5,
+      reviews: 78,
+      category: "pajaros",
+      image: "https://images.unsplash.com/photo-1552728089-571069502b48?w=400"
+    },
+    {
+      id: 10,
+      name: "Cámara de Seguridad para Mascotas HD",
       price: 34.99,
       originalPrice: 49.99,
       discount: 30,
       rating: 4.8,
-      reviews: 567,
-      category: "gatos",
-      image: "https://readdy.ai/api/search-image?query=Electric%20pet%20grooming%20brush%20with%20massage%20function%2C%20automatic%20pet%20hair%20remover%20brush%2C%20modern%20grooming%20tool%20for%20cats%20and%20dogs%20with%20soft%20bristles&width=400&height=300&seq=electricbrush1&orientation=landscape"
-    },
-    {
-      id: 18,
-      name: "Transportín Expandible con Ruedas",
-      price: 89.99,
-      originalPrice: 119.99,
-      discount: 25,
-      rating: 4.6,
-      reviews: 178,
-      category: "perros",
-      image: "https://readdy.ai/api/search-image?query=Expandable%20pet%20carrier%20with%20wheels%2C%20modern%20rolling%20pet%20travel%20bag%20with%20mesh%20windows%2C%20airline%20approved%20pet%20carrier%20with%20telescopic%20handle&width=400&height=300&seq=carrier1&orientation=landscape"
-    },
-    {
-      id: 19,
-      name: "Túnel de Juego Plegable para Gatos",
-      price: 29.99,
-      originalPrice: 39.99,
-      discount: 25,
-      rating: 4.7,
-      reviews: 423,
-      category: "gatos",
-      image: "https://readdy.ai/api/search-image?query=Collapsible%20cat%20play%20tunnel%20with%20multiple%20openings%2C%20colorful%20cat%20tunnel%20toy%20with%20crinkle%20material%2C%20foldable%20cat%20entertainment%20tunnel&width=400&height=300&seq=cattunnel1&orientation=landscape"
-    },
-    {
-      id: 20,
-      name: "Dispensador de Premios Interactivo",
-      price: 39.99,
-      originalPrice: 54.99,
-      discount: 27,
-      rating: 4.8,
-      reviews: 312,
-      category: "perros",
-      image: "https://readdy.ai/api/search-image?query=Interactive%20treat%20dispenser%20puzzle%20toy%20for%20dogs%2C%20smart%20pet%20treat%20ball%20with%20adjustable%20difficulty%2C%20blue%20and%20white%20treat%20dispensing%20toy&width=400&height=300&seq=treatdispenser1&orientation=landscape"
-    },
-    {
-      id: 21,
-      name: "Cortauñas Eléctrico con Luz LED",
-      price: 24.99,
-      originalPrice: 34.99,
-      discount: 29,
-      rating: 4.6,
-      reviews: 267,
-      category: "perros",
-      image: "https://readdy.ai/api/search-image?query=Electric%20pet%20nail%20grinder%20with%20LED%20light%2C%20safe%20nail%20trimmer%20for%20dogs%20and%20cats%2C%20modern%20pet%20nail%20clipper%20with%20quiet%20motor&width=400&height=300&seq=nailgrinder1&orientation=landscape"
-    },
-    {
-      id: 22,
-      name: "Manta Térmica Autocalentable",
-      price: 49.99,
-      originalPrice: 69.99,
-      discount: 29,
-      rating: 4.9,
-      reviews: 389,
-      category: "gatos",
-      image: "https://readdy.ai/api/search-image?query=Self%20heating%20pet%20blanket%20with%20thermal%20technology%2C%20soft%20gray%20pet%20warming%20mat%2C%20cozy%20self%20warming%20bed%20for%20cats%20and%20small%20dogs&width=400&height=300&seq=heatingblanket1&orientation=landscape"
-    },
-    {
-      id: 23,
-      name: "Pelota Interactiva con Movimiento Automático",
-      price: 32.99,
-      originalPrice: 44.99,
-      discount: 27,
-      rating: 4.7,
-      reviews: 445,
-      category: "perros",
-      image: "https://readdy.ai/api/search-image?query=Automatic%20rolling%20ball%20toy%20for%20dogs%2C%20self%20moving%20interactive%20pet%20ball%20with%20LED%20lights%2C%20smart%20pet%20toy%20that%20moves%20by%20itself&width=400&height=300&seq=autoball1&orientation=landscape"
-    },
-    {
-      id: 24,
-      name: "Escalera Plegable para Mascotas",
-      price: 54.99,
-      originalPrice: 74.99,
-      discount: 27,
-      rating: 4.6,
-      reviews: 198,
-      category: "perros",
-      image: "https://readdy.ai/api/search-image?query=Foldable%20pet%20stairs%20for%20bed%20and%20couch%2C%20portable%20dog%20steps%20with%20non%20slip%20surface%2C%20gray%20pet%20ramp%20for%20small%20dogs%20and%20cats&width=400&height=300&seq=petsteps1&orientation=landscape"
+      reviews: 620,
+      category: "todos",
+      image: "https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?w=400"
     }
   ];
 
@@ -299,9 +160,17 @@ export default function Home() {
     window.open(`${whatsappUrl}?text=${encodedMessage}`, '_blank');
   };
 
+  const connectWallet = () => {
+    navigate('/hairy-wallet');
+  };
+
+  const handlePurchase = (product: typeof featuredProducts[0]) => {
+    setCheckoutProduct(product);
+    setShowCheckoutModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -317,137 +186,128 @@ export default function Home() {
             </div>
 
             <nav className="hidden md:flex items-center space-x-8">
-              <a href="#productos" className="text-gray-700 hover:text-blue-900 transition-colors cursor-pointer">
-                Productos
-              </a>
+              <a href="#productos" className="text-gray-700 hover:text-blue-900 transition-colors cursor-pointer">Productos</a>
               <Link to="/automation-dashboard" className="text-gray-700 hover:text-blue-900 transition-colors cursor-pointer flex items-center space-x-1">
                 <i className="ri-robot-line"></i>
                 <span>Automatización</span>
               </Link>
-              <Link to="/hairy-home" className="text-gray-700 hover:text-blue-900 transition-colors cursor-pointer">
-                Hairy Home
+              <Link to="/hairy-home" className="text-gray-700 hover:text-blue-900 transition-colors cursor-pointer">Hairy Home</Link>
+              <Link to="/hairy-tools" className="text-blue-600 font-bold hover:text-blue-900 transition-colors cursor-pointer flex items-center space-x-1">
+                <img src="/HairyTools_Icon.png" alt="Icon" className="w-6 h-6 rounded-md object-cover shadow-sm" />
+                <span>Hairy Tools</span>
               </Link>
-              <Link to="/hairy-wallet" className="text-gray-700 hover:text-blue-900 transition-colors cursor-pointer">
-                Hairy Wallet
-              </Link>
+              <Link to="/hairy-wallet" className="text-gray-700 hover:text-blue-900 transition-colors cursor-pointer">Hairy Wallet</Link>
             </nav>
 
-            <button
-              onClick={() => handleWhatsAppContact()}
-              className="text-green-500 hover:text-green-600 cursor-pointer"
-            >
-              <i className="ri-whatsapp-line text-2xl"></i>
-            </button>
+            <div className="flex items-center gap-4">
+              <button onClick={() => handleWhatsAppContact()} className="text-green-500 hover:text-green-600 cursor-pointer">
+                <i className="ri-whatsapp-line text-2xl"></i>
+              </button>
+              {walletAddress ? (
+                <div className="bg-purple-100 text-purple-900 px-4 py-2 rounded-full font-bold flex items-center gap-2">
+                  <i className="ri-wallet-3-line"></i>
+                  HairyWallet: {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+                </div>
+              ) : (
+                <button onClick={connectWallet} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md">
+                  <i className="ri-wallet-3-line"></i>
+                  Usar mi HairyWallet
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-blue-900 to-blue-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              🐾 HairyPetShop - Para Tu Mejor Amigo
-            </h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">🐾 HairyPetShop - Para Tu Mejor Amigo</h2>
             <p className="text-lg md:text-xl mb-8 text-blue-100 max-w-3xl mx-auto">
-              Porque tu mascota merece lo mejor, siempre. Un sistema fácil y automático que te acerca todo lo necesario.
+              Compra tus productos con Solana (SOL) en tiempo real, directamente con tu HairyWallet sin intermediarios.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <a
-                href="#productos"
-                className="bg-white hover:bg-gray-50 text-blue-900 px-8 py-3 rounded-full text-lg font-bold transition-colors shadow-lg cursor-pointer whitespace-nowrap"
+              <Link
+                to="/hairy-tools"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full text-lg font-bold transition-colors shadow-lg cursor-pointer whitespace-nowrap flex items-center space-x-3"
               >
-                Ver Productos
-              </a>
-              <button
-                onClick={() => handleWhatsAppContact()}
-                className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-full text-lg font-bold transition-colors cursor-pointer inline-flex items-center justify-center space-x-2 shadow-lg whitespace-nowrap"
-              >
-                <i className="ri-whatsapp-line text-xl"></i>
-                <span>Contactar por WhatsApp</span>
-              </button>
+                <img src="/HairyTools_Icon.png" alt="Tools Icon" className="w-8 h-8 rounded-lg shadow-md bg-white p-0.5" />
+                <span>Probar Hairy Tools IA</span>
+              </Link>
+              {!walletAddress && (
+                <button
+                  onClick={connectWallet}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-full text-lg font-bold transition-colors cursor-pointer inline-flex items-center justify-center space-x-2 shadow-lg whitespace-nowrap"
+                >
+                  <i className="ri-wallet-3-line text-xl"></i>
+                  <span>Configurar Wallet para Comprar</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Productos Section */}
-      <section id="productos" className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              🛒 Productos para tu Mascota
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Todo lo que tu mejor amigo necesita, con la mejor calidad y precios especiales
-            </p>
+      {/* Sección de Estadísticas Públicas (Social Proof) */}
+      <section className="bg-white border-b border-gray-100 relative z-10 -mt-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
+            <div className="p-4">
+               <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                 <i className="ri-group-line text-2xl text-blue-600"></i>
+               </div>
+               <h3 className="text-4xl font-black text-gray-900 mb-1">12,485</h3>
+               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Usuarios Registrados</p>
+            </div>
+            <div className="p-4">
+               <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                 <i className="ri-pulse-line text-2xl text-green-600"></i>
+               </div>
+               <h3 className="text-4xl font-black text-gray-900 mb-1 flex items-center justify-center gap-2">
+                 1,240 <span className="flex h-3 w-3 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span></span>
+               </h3>
+               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Tráfico Real Hoy</p>
+            </div>
+            <div className="p-4">
+               <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                 <i className="ri-shopping-cart-2-line text-2xl text-purple-600"></i>
+               </div>
+               <h3 className="text-4xl font-black text-gray-900 mb-1">487</h3>
+               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Ventas este mes</p>
+            </div>
           </div>
+        </div>
+      </section>
 
-          {/* Categorías */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`px-6 py-3 rounded-full font-medium transition-colors cursor-pointer whitespace-nowrap flex items-center space-x-2 ${
-                  selectedCategory === category.id
-                    ? 'bg-blue-900 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <i className={category.icon}></i>
-                <span>{category.name}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Productos Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-product-shop>
+      <section id="productos" className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12">🛒 Catálogo para Mascotas</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {filteredProducts.map((product) => (
-              <div key={product.id} className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="relative">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  {product.discount > 0 && (
-                    <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                      -{product.discount}%
-                    </div>
-                  )}
-                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full p-2">
-                    <div className="flex items-center space-x-1">
-                      <i className="ri-star-fill text-yellow-400 text-sm"></i>
-                      <span className="text-sm font-medium">{product.rating}</span>
-                    </div>
+              <div key={product.id} className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden relative">
+                {product.discount > 0 && (
+                  <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full font-bold text-sm z-10">
+                    -{product.discount}%
                   </div>
-                </div>
-                
+                )}
+                <img src={product.image} alt={product.name} className="w-full h-48 object-cover" />
                 <div className="p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{product.name}</h3>
-                  
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 min-h-[56px]">{product.name}</h3>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-2">
+                    <div className="text-left">
                       <span className="text-2xl font-bold text-blue-900">€{product.price}</span>
-                      {product.discount > 0 && (
-                        <span className="text-sm text-gray-500 line-through">€{product.originalPrice}</span>
-                      )}
+                      <p className="text-sm text-gray-500">~{(product.price / 150).toFixed(4)} SOL</p>
                     </div>
-                    <div className="text-sm text-gray-600">
-                      <i className="ri-chat-3-line mr-1"></i>
-                      {product.reviews}
-                    </div>
+                    <button 
+                      onClick={() => handlePurchase(product)} 
+                      disabled={isProcessing}
+                      className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg font-semibold flex items-center gap-2 cursor-pointer transition-all"
+                    >
+                      {isProcessing ? <i className="ri-loader-4-line animate-spin"></i> : <i className="ri-shopping-cart-2-line"></i>}
+                      {isProcessing ? 'Procesando...' : 'Comprar'}
+                    </button>
                   </div>
-
-                  <button
-                    onClick={() => handleWhatsAppContact(product.name)}
-                    className="w-full bg-gradient-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center space-x-2"
-                  >
-                    <i className="ri-shopping-cart-line"></i>
-                    <span>Comprar Ahora</span>
-                  </button>
                 </div>
               </div>
             ))}
@@ -455,79 +315,136 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      {/* Footer Moderno con Enlaces Legales y Publicidad */}
+      <footer className="bg-[#0f1219] text-gray-400 py-16 border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <img 
-                  src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" 
-                  alt="HairyPetShop Logo" 
-                  className="w-10 h-10"
-                />
-                <h3 className="text-xl font-bold" style={{ fontFamily: '"Pacifico", serif' }}>
-                  HairyPetShop
-                </h3>
-              </div>
-              <p className="text-gray-400 text-sm">
-                Tu tienda de confianza para el cuidado y bienestar de tu mascota.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Enlaces Rápidos</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="#productos" className="text-gray-400 hover:text-white transition-colors cursor-pointer">
-                    Productos
-                  </a>
-                </li>
-                <li>
-                  <Link to="/automation-dashboard" className="text-gray-400 hover:text-white transition-colors cursor-pointer">
-                    Automatización
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/hairy-home" className="text-gray-400 hover:text-white transition-colors cursor-pointer">
-                    Hairy Home
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Contacto</h4>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center space-x-2">
-                  <i className="ri-whatsapp-line text-green-400"></i>
-                  <span className="text-gray-400">+34 744 403 191</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <i className="ri-mail-line text-blue-400"></i>
-                  <span className="text-gray-400">info@hairypetshop.com</span>
-                </li>
-              </ul>
-            </div>
+          
+          {/* Espacio Publicitario (Google Ads Footer) */}
+          <div className="w-full bg-[#1a1f2e] border border-gray-700 border-dashed rounded-lg h-24 mb-12 flex flex-col items-center justify-center text-gray-500">
+            <span className="text-xs uppercase tracking-widest font-bold">Espacio Publicitario Reservado (Google Ads)</span>
+            <span className="text-[10px]">728 x 90 Leaderboard</span>
           </div>
 
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-400 text-sm">
-                © 2024 HairyPetShop. Todos los derechos reservados.
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div>
+              <div className="flex items-center space-x-3 mb-6">
+                <img src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" alt="Logo" className="w-10 h-10 grayscale opacity-70" />
+                <h3 className="text-xl font-bold text-white font-serif">HairyPetShop</h3>
+              </div>
+              <p className="text-sm leading-relaxed mb-6">
+                Tu destino de confianza para productos premium, tecnología IA y pagos descentralizados.
               </p>
-              <a 
-                href="https://readdy.ai/?origin=logo" 
-                className="text-gray-500 hover:text-gray-400 text-sm transition-colors mt-2 md:mt-0"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Website Builder
-              </a>
+              <div className="mt-4 flex flex-col items-start bg-[#161b26] p-4 rounded-xl border border-gray-800">
+                <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3">Soporte Corporativo:</p>
+                <a href="mailto:hairyelbicho@gmail.com" className="text-orange-500 font-bold hover:underline mb-4 flex items-center gap-2">
+                  <i className="ri-mail-send-line"></i> hairyelbicho@gmail.com
+                </a>
+                <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3">Una marca de:</p>
+                <div className="flex items-center gap-3">
+                  <img src="/Arkadium-logo.jpg" alt="Arkadium88 Logo" className="w-16 h-16 rounded-lg object-contain bg-[#1a1f2e] border border-gray-700 p-1 shadow-lg" />
+                  <span className="font-bold text-gray-200 tracking-widest uppercase text-xs">Arkadium88 Holdings SL</span>
+                </div>
+              </div>
             </div>
+            
+            <div>
+              <h4 className="text-white font-bold uppercase tracking-wider mb-6">Enlaces Rápidos</h4>
+              <ul className="space-y-4">
+                <li><a href="#" className="hover:text-white transition-colors">Sobre Nosotros</a></li>
+                <li><a href="#productos" className="hover:text-white transition-colors">Catálogo</a></li>
+                <li><Link to="/hairy-tools" className="hover:text-white transition-colors">Hairy Tools (IA)</Link></li>
+                <li><Link to="/hairy-wallet" className="hover:text-white transition-colors">Hairy Wallet</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-white font-bold uppercase tracking-wider mb-6">Legal & Privacidad</h4>
+              <ul className="space-y-4">
+                <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2"><i className="ri-shield-check-line"></i> Política de Privacidad</a></li>
+                <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2"><i className="ri-file-list-3-line"></i> Términos de Servicio</a></li>
+                <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2"><i className="ri-refund-2-line"></i> Política de Devoluciones</a></li>
+                <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2"><i className="ri-cookie-line"></i> Política de Cookies</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-white font-bold uppercase tracking-wider mb-6">Redes Sociales</h4>
+              <div className="flex space-x-4">
+                <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-white hover:text-gray-900 transition-colors">
+                  <i className="ri-twitter-x-line"></i>
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-white hover:text-gray-900 transition-colors">
+                  <i className="ri-instagram-line"></i>
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-white hover:text-gray-900 transition-colors">
+                  <i className="ri-tiktok-fill"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-sm">
+            <p>&copy; 2026 Arkadium88 Holdings SL. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
+
+      {/* Modal de Selección de Pago */}
+      {showCheckoutModal && checkoutProduct && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+               <h3 className="text-xl font-bold text-gray-900">Método de Pago</h3>
+               <button onClick={() => setShowCheckoutModal(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer border-none bg-transparent">
+                  <i className="ri-close-line text-2xl"></i>
+               </button>
+            </div>
+
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl mb-6">
+               <img src={checkoutProduct.image} className="w-16 h-16 rounded-lg object-cover" alt={checkoutProduct.name} />
+               <div>
+                  <p className="font-bold text-gray-800 leading-tight">{checkoutProduct.name}</p>
+                  <p className="text-blue-600 font-black text-lg">€{checkoutProduct.price}</p>
+               </div>
+            </div>
+
+            <div className="space-y-3">
+               <button 
+                 onClick={() => { 
+                   setShowCheckoutModal(false); 
+                   setShowStripeModal(true);
+                 }}
+                 className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg cursor-pointer border-none flex items-center justify-center gap-2"
+               >
+                 <i className="ri-bank-card-line text-lg"></i> Pagar con Tarjeta (Stripe / Fiat)
+               </button>
+               
+               <button 
+                 onClick={() => { 
+                   setShowCheckoutModal(false); 
+                   navigate('/hairy-wallet/enviar', { 
+                     state: { 
+                        amount: (checkoutProduct.price / 150).toFixed(4), 
+                        recipient: TREASURY_WALLET,
+                        concept: `Compra Catálogo: ${checkoutProduct.name}`
+                     } 
+                   });
+                 }}
+                 className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors shadow-lg cursor-pointer border-none flex items-center justify-center gap-2"
+               >
+                 <i className="ri-wallet-3-line text-lg"></i> Pagar con HairyWallet (SOL)
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Stripe */}
+      {showStripeModal && checkoutProduct && (
+        <StripePayment 
+          product={checkoutProduct} 
+          onClose={() => setShowStripeModal(false)} 
+        />
+      )}
     </div>
   );
 }

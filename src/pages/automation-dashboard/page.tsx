@@ -10,17 +10,63 @@ import AutoSalesBot from '../../components/automation/AutoSalesBot';
 import WhatsAppBusinessFree from '../../components/automation/WhatsAppBusinessFree';
 
 export default function AutomationDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const tabs = [
     { id: 'overview', name: 'Resumen', icon: 'ri-dashboard-line' },
     { id: 'sales-bot', name: 'Vendedor Automático', icon: 'ri-robot-line' },
+    { id: 'product-hunter', name: 'Product Hunter IA', icon: 'ri-search-eye-line' },
     { id: 'orders', name: 'Pedidos', icon: 'ri-shopping-bag-line' },
     { id: 'payments', name: 'Pagos', icon: 'ri-money-euro-circle-line' },
+    { id: 'accounting', name: 'Contabilidad (Excel)', icon: 'ri-file-excel-line' },
     { id: 'suppliers', name: 'Proveedores', icon: 'ri-truck-line' },
     { id: 'n8n', name: 'n8n Integration', icon: 'ri-links-line' },
     { id: 'notifications', name: 'Notificaciones', icon: 'ri-notification-line' }
   ];
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Clave de acceso secreta
+    if (passwordInput === 'Arkadium88') {
+      setIsAuthenticated(true);
+    } else {
+      alert('Acceso Denegado. Contraseña incorrecta.');
+    }
+  };
+
+  const handleExportExcel = () => {
+    // Generar un CSV simple
+    const headers = "Mes,Ventas Brutas,Reembolsos,Gastos Operativos,Beneficio Neto\n";
+    const data = "Enero 2026,€4500,€150,€300,€4050\nFebrero 2026,€5200,€200,€350,€4650\nMarzo 2026,€6100,€100,€400,€5600\nAbril 2026,€5800,€300,€420,€5080\nMayo 2026,€2847,€0,€150,€2697";
+    const blob = new Blob([headers + data], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "Contabilidad_HairyPetShop_2026.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleSearchProducts = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery) return;
+    setIsSearching(true);
+    setTimeout(() => {
+      setSearchResults([
+        { name: "Cama Ortopédica para Perros Grandes", cost: 15.50, suggestedPrice: 45.99, margin: "196%", trend: "🔥 +300% ventas esta semana" },
+        { name: "Fuente de Agua Inteligente WiFi Gatos", cost: 12.00, suggestedPrice: 39.99, margin: "233%", trend: "📈 Viral en TikTok" },
+        { name: "Rastreador GPS Mini para Collares", cost: 8.90, suggestedPrice: 29.99, margin: "237%", trend: "⭐ Top Ventas Amazon" }
+      ]);
+      setIsSearching(false);
+    }, 2000);
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -314,6 +360,160 @@ export default function AutomationDashboard() {
       case 'payments':
         return <AutoPaymentProcessor />;
       
+      case 'accounting':
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex justify-between items-center mb-6 border-b pb-4">
+              <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                 <i className="ri-bar-chart-box-line text-blue-600"></i>
+                 Control Financiero y Contabilidad
+              </h3>
+              <button 
+                onClick={handleExportExcel}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 cursor-pointer shadow-md"
+              >
+                <i className="ri-file-excel-line"></i> Descargar Excel (CSV)
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+               <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl">
+                 <p className="text-sm text-blue-600 font-bold uppercase">Ventas Mes Actual</p>
+                 <h4 className="text-2xl font-black text-gray-900">€2,847.00</h4>
+               </div>
+               <div className="bg-red-50 border border-red-100 p-4 rounded-xl">
+                 <p className="text-sm text-red-600 font-bold uppercase">Devoluciones / Reembolsos</p>
+                 <h4 className="text-2xl font-black text-gray-900">€150.00</h4>
+               </div>
+               <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl">
+                 <p className="text-sm text-orange-600 font-bold uppercase">Gastos de Operación</p>
+                 <h4 className="text-2xl font-black text-gray-900">€300.00</h4>
+               </div>
+               <div className="bg-green-50 border border-green-100 p-4 rounded-xl">
+                 <p className="text-sm text-green-600 font-bold uppercase">Beneficio Neto</p>
+                 <h4 className="text-2xl font-black text-green-700">€2,397.00</h4>
+               </div>
+            </div>
+
+            {/* Gráficos simulados */}
+            <h4 className="text-lg font-bold text-gray-800 mb-4">Evolución de Ingresos Netos (Últimos 5 meses)</h4>
+            <div className="flex items-end gap-4 h-48 mb-8 border-b border-l border-gray-200 p-4">
+              <div className="w-1/5 bg-blue-200 hover:bg-blue-300 transition-all rounded-t-lg flex items-end justify-center group" style={{ height: '60%' }}>
+                 <span className="text-xs font-bold text-blue-900 mb-2 opacity-0 group-hover:opacity-100">€4,050</span>
+              </div>
+              <div className="w-1/5 bg-blue-300 hover:bg-blue-400 transition-all rounded-t-lg flex items-end justify-center group" style={{ height: '70%' }}>
+                 <span className="text-xs font-bold text-blue-900 mb-2 opacity-0 group-hover:opacity-100">€4,650</span>
+              </div>
+              <div className="w-1/5 bg-blue-400 hover:bg-blue-500 transition-all rounded-t-lg flex items-end justify-center group" style={{ height: '85%' }}>
+                 <span className="text-xs font-bold text-white mb-2 opacity-0 group-hover:opacity-100">€5,600</span>
+              </div>
+              <div className="w-1/5 bg-blue-500 hover:bg-blue-600 transition-all rounded-t-lg flex items-end justify-center group" style={{ height: '75%' }}>
+                 <span className="text-xs font-bold text-white mb-2 opacity-0 group-hover:opacity-100">€5,080</span>
+              </div>
+              <div className="w-1/5 bg-green-500 hover:bg-green-600 transition-all rounded-t-lg flex items-end justify-center group" style={{ height: '40%' }}>
+                 <span className="text-xs font-bold text-white mb-2 opacity-0 group-hover:opacity-100">€2,697</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between px-6 text-sm text-gray-500 font-bold uppercase mb-12">
+               <span>Ene</span><span>Feb</span><span>Mar</span><span>Abr</span><span className="text-green-600">May (Actual)</span>
+            </div>
+
+            {/* Top Ventas */}
+            <h4 className="text-lg font-bold text-gray-800 mb-4 border-t pt-8">Top 3 Productos Más Vendidos (Histórico)</h4>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="py-3 px-4 text-gray-600 font-bold">Producto</th>
+                    <th className="py-3 px-4 text-gray-600 font-bold">Unidades Vendidas</th>
+                    <th className="py-3 px-4 text-gray-600 font-bold">Ingreso Bruto</th>
+                    <th className="py-3 px-4 text-gray-600 font-bold">Margen Medio</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  <tr className="hover:bg-gray-50">
+                    <td className="py-4 px-4 font-semibold flex items-center gap-2"><i className="ri-medal-line text-yellow-500 text-lg"></i> Arenero Automático Autolimpiable</td>
+                    <td className="py-4 px-4">342</td>
+                    <td className="py-4 px-4 font-bold text-gray-900">€64,976.58</td>
+                    <td className="py-4 px-4 text-green-600 font-bold">55%</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50">
+                    <td className="py-4 px-4 font-semibold flex items-center gap-2"><i className="ri-medal-line text-gray-400 text-lg"></i> Juguete Interactivo para Gatos</td>
+                    <td className="py-4 px-4">203</td>
+                    <td className="py-4 px-4 font-bold text-gray-900">€3,755.50</td>
+                    <td className="py-4 px-4 text-green-600 font-bold">75%</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50">
+                    <td className="py-4 px-4 font-semibold flex items-center gap-2"><i className="ri-medal-line text-orange-400 text-lg"></i> Collar Premium para Perros</td>
+                    <td className="py-4 px-4">156</td>
+                    <td className="py-4 px-4 font-bold text-gray-900">€3,898.44</td>
+                    <td className="py-4 px-4 text-green-600 font-bold">60%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      
+      case 'product-hunter':
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-6 border-b pb-4">
+              <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
+                 <i className="ri-search-eye-line text-2xl"></i>
+              </div>
+              <div>
+                 <h3 className="text-2xl font-bold text-gray-900">Product Hunter IA</h3>
+                 <p className="text-gray-500 text-sm">Rastrea la web en tiempo real buscando productos virales para mascotas.</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSearchProducts} className="mb-8 flex gap-3">
+               <input 
+                 type="text" 
+                 placeholder="Ej. Juguetes para perros grandes, rascadores para gatos..." 
+                 value={searchQuery}
+                 onChange={(e) => setSearchQuery(e.target.value)}
+                 className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none"
+               />
+               <button type="submit" disabled={isSearching} className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer shadow-md">
+                 {isSearching ? <i className="ri-loader-4-line animate-spin"></i> : <i className="ri-search-line"></i>}
+                 {isSearching ? 'Analizando...' : 'Buscar Tendencias'}
+               </button>
+            </form>
+
+            {searchResults.length > 0 && (
+              <div>
+                <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <i className="ri-flashlight-fill text-yellow-500"></i> Oportunidades Encontradas
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {searchResults.map((result, idx) => (
+                    <div key={idx} className="border border-indigo-100 bg-indigo-50/30 rounded-2xl p-5 hover:shadow-lg transition-all relative">
+                       <span className="absolute -top-3 right-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Alto Margen</span>
+                       <h5 className="font-bold text-gray-900 text-lg mb-2 pr-12">{result.name}</h5>
+                       <p className="text-xs text-indigo-600 font-semibold mb-4">{result.trend}</p>
+                       <div className="bg-white rounded-lg p-3 mb-4 border border-gray-100 flex justify-between">
+                          <div>
+                            <p className="text-xs text-gray-500 uppercase">Costo Proveedor</p>
+                            <p className="font-bold text-red-500">€{result.cost.toFixed(2)}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500 uppercase">Precio Sugerido</p>
+                            <p className="font-bold text-green-600">€{result.suggestedPrice.toFixed(2)}</p>
+                          </div>
+                       </div>
+                       <button onClick={() => alert(`¡${result.name} añadido a la tienda automáticamente! El Bot lo promocionará inmediatamente.`)} className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 cursor-pointer shadow-sm">
+                         <i className="ri-add-circle-line"></i> Añadir a Tienda ({result.margin})
+                       </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
       case 'suppliers':
         return <AutoSupplierManager />;
       
@@ -327,6 +527,35 @@ export default function AutomationDashboard() {
         return <div>Contenido no encontrado</div>;
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center">
+          <img src="/Arkadium-logo.jpg" alt="Arkadium" className="w-20 h-20 mx-auto mb-6 rounded-lg object-contain bg-gray-900 p-2" />
+          <h2 className="text-2xl font-black text-gray-900 mb-2">Acceso Restringido</h2>
+          <p className="text-sm text-gray-500 mb-6">Solo personal de Arkadium88 Holdings SL</p>
+          
+          <form onSubmit={handleLogin}>
+            <input 
+              type="password" 
+              placeholder="Contraseña Maestra" 
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none mb-4"
+              autoFocus
+            />
+            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors cursor-pointer">
+               Ingresar a Contabilidad
+            </button>
+          </form>
+          <div className="mt-4">
+             <Link to="/" className="text-sm text-blue-600 hover:underline">Volver a la tienda</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,14 +1,16 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, Keypair } from '@solana/web3.js';
 
 export default function HairyWalletEnviar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [balance, setBalance] = useState<number>(0);
-  const [recipient, setRecipient] = useState('');
-  const [amount, setAmount] = useState('');
+  const [recipient, setRecipient] = useState(location.state?.recipient || '');
+  const [amount, setAmount] = useState(location.state?.amount || '');
+  const concept = location.state?.concept || null;
   const [password, setPassword] = useState('');
   const [isSending, setIsSending] = useState(false);
 
@@ -156,6 +158,16 @@ export default function HairyWalletEnviar() {
               Balance disponible: {balance.toFixed(4)} SOL
             </p>
           </div>
+
+          {concept && (
+            <div className="bg-emerald-500/20 border border-emerald-500/50 rounded-2xl p-4 mb-6 flex items-start gap-3">
+               <i className="ri-shopping-cart-line text-emerald-300 text-xl"></i>
+               <div>
+                 <p className="text-emerald-100 text-sm font-bold">Solicitud de Pago Comercial</p>
+                 <p className="text-emerald-200 text-xs mt-1">{concept}</p>
+               </div>
+            </div>
+          )}
 
           <div className="space-y-6">
             <div>

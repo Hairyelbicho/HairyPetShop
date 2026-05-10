@@ -10,7 +10,7 @@ Este proyecto ha sido migrado de **WhatsApp Business + IA Luna** a **Telegram Bo
 
 #### Telegram Bot
 - **Bot Username**: `@HairyPet_bot`
-- **Bot Token**: `7611611121:AAHkEDU1_QK68PKLH2ac-2Ikldi5JukOx4A`
+- **Bot Token**: `7611611121:AAGsvrmG3_bTR5m8yCutpZIWdmXkWLSEjE8`
 - **Usuario ID**: `813631400`
 - **Cuenta**: `@Tokten43`
 

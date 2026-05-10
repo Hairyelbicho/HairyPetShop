@@ -197,35 +197,47 @@ export default function AutoSalesBot() {
     setIsGeneratingSale(true);
     
     try {
-      const response = await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/ai-sales-agent', {
+      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+      if (!apiKey) {
+        alert('⚠️ Por favor, configura tu API Key de Groq en el archivo .env (VITE_GROQ_API_KEY) para usar la IA en tiempo real.');
+        setIsGeneratingSale(false);
+        return;
+      }
+
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          action: 'generate_sales_message',
-          data: {
-            customerBehavior: 'interested',
-            productInterest: 'collar-premium',
-            timeOnSite: 120,
-            phone: '+34744403191'
-          }
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            {
+              role: 'system',
+              content: 'Eres Luna, la especialista personal en mascotas de PetStore. Eres un bot avanzado impulsado por la API de Groq. Tu objetivo es vender productos para mascotas de forma muy amable, corta y entusiasta. Envía un saludo breve ofreciendo un descuento exclusivo.'
+            }
+          ]
         }),
       });
 
       const result = await response.json();
       
-      if (result.success) {
-        // Mostrar mensaje de Luna IA
-        alert(`🤖 Luna IA dice:\n\n${result.message}`);
+      if (result.choices && result.choices.length > 0) {
+        // Mostrar mensaje generado por Groq
+        alert(`🤖 Luna (Powered by Groq) dice:\n\n${result.choices[0].message.content}`);
         
         // Generar venta de prueba
         setTimeout(() => {
           generateAutomaticSale();
         }, 1000);
+      } else {
+        alert('Error al generar respuesta con Groq. Revisa la consola para más detalles.');
+        console.error(result);
       }
     } catch (error) {
-      console.error('Error probando Luna IA:', error);
+      console.error('Error probando IA de Groq:', error);
+      alert('Error de conexión con Groq. Verifica tu conexión y API Key.');
     }
     
     setIsGeneratingSale(false);
@@ -352,15 +364,15 @@ ${config.steps.join('\n')}
               <i className="ri-robot-line text-2xl"></i>
             </div>
             <div>
-              <h3 className="text-2xl font-bold">🤖 Luna IA - Vendedora Automática Multi-Canal</h3>
-              <p className="text-purple-100">Vendedora IA atenta, amable y convincente • Activa 24/7 en todos los canales</p>
+              <h3 className="text-2xl font-bold">🤖 Luna (Powered by Groq) - Vendedora Automática</h3>
+              <p className="text-purple-100">IA ultra rápida de Groq • Activa 24/7 en todos los canales</p>
             </div>
           </div>
           
           <div className="flex items-center space-x-3">
             <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${lunaActive ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
               <div className={`w-2 h-2 rounded-full ${lunaActive ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
-              <span className="text-sm font-medium">{lunaActive ? 'Luna IA Activa' : 'Luna IA Inactiva'}</span>
+              <span className="text-sm font-medium">{lunaActive ? 'Groq IA Activa' : 'Groq IA Inactiva'}</span>
             </div>
             
             <button
@@ -376,7 +388,7 @@ ${config.steps.join('\n')}
               ) : (
                 <>
                   <i className="ri-play-line"></i>
-                  <span>Probar Luna IA</span>
+                  <span>Probar Groq IA</span>
                 </>
               )}
             </button>

@@ -1,9 +1,152 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 export default function HairyWalletPage() {
   const navigate = useNavigate();
   const [showInstallModal, setShowInstallModal] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [balance, setBalance] = useState<number>(0);
+
+  useEffect(() => {
+    const savedWallet = localStorage.getItem('hairy_wallet_address');
+    if (savedWallet) {
+      setWalletAddress(savedWallet);
+      fetchBalance(savedWallet);
+    }
+  }, []);
+
+  const fetchBalance = async (address: string) => {
+    try {
+      const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+      const pubKey = new PublicKey(address);
+      const balanceInLamports = await connection.getBalance(pubKey);
+      setBalance(balanceInLamports / LAMPORTS_PER_SOL);
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+    }
+  };
+
+  const disconnect = () => {
+    localStorage.removeItem('hairy_wallet_address');
+    localStorage.removeItem('hairy_wallet_encrypted');
+    localStorage.removeItem('hairy_wallet_mnemonic');
+    setWalletAddress(null);
+    setBalance(0);
+  };
+
+  if (walletAddress) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full filter blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500 rounded-full filter blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <header className="relative z-10 bg-black/30 backdrop-blur-lg border-b border-white/10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                  <i className="ri-wallet-3-fill text-white text-xl"></i>
+                </div>
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: '"Pacifico", serif' }}>HairyWallet</h1>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate('/hairy-home')}
+                  className="bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-full transition-all whitespace-nowrap cursor-pointer"
+                >
+                  <i className="ri-arrow-left-line"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section className="relative z-10 max-w-4xl mx-auto px-4 py-12">
+          <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 mb-8 border border-white/20 shadow-2xl">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <p className="text-purple-200 text-sm mb-1">Balance Total</p>
+                <h2 className="text-5xl font-bold text-white">{balance.toFixed(4)} SOL</h2>
+                <p className="text-purple-300 mt-2">≈ ${(balance * 150).toFixed(2)} USD</p>
+              </div>
+              <button onClick={disconnect} className="bg-red-500/20 hover:bg-red-500/40 text-red-300 px-4 py-2 rounded-xl text-sm transition-all cursor-pointer border border-red-500/30">
+                <i className="ri-logout-box-r-line mr-2"></i> Desconectar
+              </button>
+            </div>
+            
+            <div className="bg-black/30 rounded-2xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center">
+                  <i className="ri-qr-code-line text-purple-400"></i>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400">Tu Dirección</p>
+                  <p className="text-sm text-white font-mono">{walletAddress.slice(0, 8)}...{walletAddress.slice(-8)}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(walletAddress);
+                  alert('Dirección copiada!');
+                }}
+                className="text-purple-300 hover:text-white cursor-pointer transition-colors"
+              >
+                <i className="ri-file-copy-line text-xl"></i>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <button onClick={() => navigate('/hairy-wallet/enviar')} className="bg-gradient-to-br from-red-500 to-pink-600 rounded-3xl p-6 text-center hover:scale-105 transition-all shadow-xl cursor-pointer">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="ri-arrow-right-up-line text-white text-3xl"></i>
+              </div>
+              <h3 className="text-xl font-bold text-white">Enviar SOL</h3>
+            </button>
+            <button onClick={() => navigate('/hairy-wallet/recibir')} className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-6 text-center hover:scale-105 transition-all shadow-xl cursor-pointer">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="ri-arrow-left-down-line text-white text-3xl"></i>
+              </div>
+              <h3 className="text-xl font-bold text-white">Recibir SOL</h3>
+            </button>
+            <button onClick={() => navigate('/hairy-wallet/historial')} className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl p-6 text-center hover:scale-105 transition-all shadow-xl cursor-pointer">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="ri-history-line text-white text-3xl"></i>
+              </div>
+              <h3 className="text-xl font-bold text-white">Historial</h3>
+            </button>
+          </div>
+
+          {/* Gráfico en Tiempo Real de Solana */}
+          <div className="mt-8 bg-black/30 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <i className="ri-stock-line text-blue-400"></i> Solana (SOL) Market en Tiempo Real
+            </h3>
+            <div className="h-[400px] w-full rounded-xl overflow-hidden bg-white">
+              <iframe 
+                src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ASOLUSDT&interval=15&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=light&style=1&timezone=Etc%2FUTC&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=es&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=BINANCE%3ASOLUSDT"
+                width="100%" 
+                height="100%" 
+                frameBorder="0" 
+                scrolling="no" 
+              ></iframe>
+            </div>
+          </div>
+
+          {/* Espacio Publicitario (Google Ads Footer Wallet) */}
+          <div className="w-full bg-black/40 border border-purple-500/30 border-dashed rounded-lg h-24 mt-8 flex flex-col items-center justify-center text-purple-300">
+            <span className="text-xs uppercase tracking-widest font-bold">Espacio Publicitario Reservado (Google Ads)</span>
+            <span className="text-[10px]">728 x 90 Leaderboard</span>
+          </div>
+
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 relative overflow-hidden">
@@ -81,7 +224,7 @@ export default function HairyWalletPage() {
             <p className="text-purple-100 mb-6">
               Genera una nueva wallet de Solana con tu frase de recuperación única
             </p>
-            <button className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold hover:bg-purple-50 transition-all flex items-center gap-2 whitespace-nowrap">
+            <button className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold hover:bg-purple-50 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer">
               Empezar ahora
               <i className="ri-arrow-right-line"></i>
             </button>
@@ -97,7 +240,7 @@ export default function HairyWalletPage() {
             <p className="text-blue-100 mb-6">
               Importa tu wallet usando tu frase de recuperación de 12 o 24 palabras
             </p>
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold hover:bg-blue-50 transition-all flex items-center gap-2 whitespace-nowrap">
+            <button className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold hover:bg-blue-50 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer">
               Importar ahora
               <i className="ri-arrow-right-line"></i>
             </button>

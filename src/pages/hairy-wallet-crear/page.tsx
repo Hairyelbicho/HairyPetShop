@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Keypair } from '@solana/web3.js';
 import * as nacl from 'tweetnacl';
 import bs58 from 'bs58';
+import { useNavigate } from 'react-router-dom';
 
 export default function HairyWalletCrear() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [mnemonic, setMnemonic] = useState('');
   const [walletAddress, setWalletAddress] = useState('');
@@ -74,19 +76,19 @@ export default function HairyWalletCrear() {
       return;
     }
 
-    // Guardar en localStorage (en producción usar encriptación)
     const walletData = {
       address: walletAddress,
       secretKey: secretKey,
       mnemonic: mnemonic,
+      password: password,
       createdAt: new Date().toISOString()
     };
 
-    localStorage.setItem('hairyWallet', JSON.stringify(walletData));
-    localStorage.setItem('hairyWalletPassword', password); // En producción, hashear
+    const encryptedData = btoa(JSON.stringify(walletData));
+    localStorage.setItem('hairy_wallet_encrypted', encryptedData);
+    localStorage.setItem('hairy_wallet_address', walletAddress);
 
-    // Redirigir a la wallet
-    window.REACT_APP_NAVIGATE('/hairy-wallet');
+    navigate('/hairy-wallet');
   };
 
   return (
@@ -96,7 +98,7 @@ export default function HairyWalletCrear() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => window.REACT_APP_NAVIGATE('/hairy-wallet')}
+              onClick={() => navigate('/hairy-wallet')}
               className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors cursor-pointer"
             >
               <i className="ri-arrow-left-line text-xl"></i>

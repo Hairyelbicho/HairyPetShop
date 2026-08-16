@@ -59,7 +59,7 @@ export default function WalletRegister() {
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center space-x-3">
                 <img 
-                  src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" 
+                  src="/hairy-wallet-logo.png" 
                   alt="HairyWallet Logo" 
                   className="w-10 h-10"
                 />
@@ -139,7 +139,7 @@ export default function WalletRegister() {
           <div className="flex items-center justify-between h-16">
             <Link to="/hairy-wallet" className="flex items-center space-x-3">
               <img 
-                src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" 
+                src="/hairy-wallet-logo.png" 
                 alt="HairyWallet Logo" 
                 className="w-10 h-10"
               />

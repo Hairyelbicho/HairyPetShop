@@ -1,6 +1,14 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StripePayment from '../../components/payments/StripePayment';
+import {
+  fulfillPrintifyOrder,
+  getPrintifyCatalog,
+  getPrintifyProductOptions,
+  type PrintifyCatalogItem,
+  type PrintifyOptions,
+  type PrintifyVariant,
+} from '../../utils/printify';
 
 export default function HairyTools() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -10,11 +18,18 @@ export default function HairyTools() {
   const [showProductModal, setShowProductModal] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showStripeModal, setShowStripeModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [selectedSize, setSelectedSize] = useState('M');
+  const [selectedProduct, setSelectedProduct] = useState<PrintifyCatalogItem | null>(null);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [printifyProducts, setPrintifyProducts] = useState<PrintifyCatalogItem[]>([]);
+  const [printifyOptions, setPrintifyOptions] = useState<PrintifyOptions | null>(null);
+  const [printifyLoading, setPrintifyLoading] = useState(false);
+  const [printifyError, setPrintifyError] = useState('');
+  const [orderStatus, setOrderStatus] = useState('');
+  const [orderResult, setOrderResult] = useState<{ mockup?: string; orderId?: string } | null>(null);
   
   const [shippingInfo, setShippingInfo] = useState({
-    name: '', email: '', address: '', city: '', zip: ''
+    name: '', email: '', phone: '', address: '', city: '', zip: '', country: 'ES'
   });
   
   const navigate = useNavigate();
@@ -27,26 +42,100 @@ export default function HairyTools() {
     { id: 'ollama-mistral', name: 'Mistral (Local)' }
   ];
 
-  const productTypes = [
-    { 
-      id: 'tshirt', 
-      name: 'Camiseta Premium', 
-      image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300',
-      prices: { 'S': 24.99, 'M': 26.99, 'L': 28.99, 'XL': 32.99 }
-    },
-    { 
-      id: 'hoodie', 
-      name: 'Sudadera Studio', 
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=300',
-      prices: { 'S': 42.99, 'M': 45.99, 'L': 48.99, 'XL': 52.99 }
-    },
-    { 
-      id: 'cap', 
-      name: 'Gorra Trucker', 
-      image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=300',
-      prices: { 'Única': 19.99 }
+  const openPrintifyCatalog = async () => {
+    setShowProductModal(true);
+    setPrintifyError('');
+    setOrderResult(null);
+    setPrintifyLoading(true);
+    try {
+      const catalog = await getPrintifyCatalog();
+      if (!catalog.configured) {
+        setPrintifyError(catalog.error || 'Printify no está configurado. Necesitas un token API.');
+        setPrintifyProducts([]);
+        return;
+      }
+      if (!catalog.success) {
+        setPrintifyError(catalog.error || 'No se pudo cargar el catálogo de Printify.');
+        return;
+      }
+      setPrintifyProducts(catalog.products || []);
+      if (!catalog.products?.length) {
+        setPrintifyError('Printify respondió, pero no hay camisetas/sudaderas/gorras disponibles para esta cuenta.');
+      }
+    } catch (error) {
+      setPrintifyError(error instanceof Error ? error.message : 'Error al conectar con Printify.');
+    } finally {
+      setPrintifyLoading(false);
     }
-  ];
+  };
+
+  const selectPrintifyProduct = async (product: PrintifyCatalogItem) => {
+    setSelectedProduct(product);
+    setPrintifyError('');
+    setPrintifyLoading(true);
+    try {
+      const options = await getPrintifyProductOptions(product.blueprintId);
+      if (!options.success) {
+        setPrintifyError(options.error || 'No se pudieron cargar tallas de Printify.');
+        return;
+      }
+      setPrintifyOptions(options);
+      setSelectedColor(options.colors[0] || '');
+      setSelectedSize(options.sizes[0] || '');
+      setShowProductModal(false);
+      setShowCheckoutModal(true);
+    } catch (error) {
+      setPrintifyError(error instanceof Error ? error.message : 'Error al cargar variantes.');
+    } finally {
+      setPrintifyLoading(false);
+    }
+  };
+
+  const matchingVariants = (): PrintifyVariant[] => {
+    return (printifyOptions?.variants || []).filter((variant) =>
+      (!selectedColor || variant.color === selectedColor) &&
+      (!selectedSize || variant.size === selectedSize)
+    );
+  };
+
+  const selectedVariant = matchingVariants()[0] || printifyOptions?.variants[0];
+
+  const submitPrintifyOrder = async () => {
+    if (!selectedProduct || !generatedContent) return;
+    if (!shippingInfo.name || !shippingInfo.email || !shippingInfo.address || !shippingInfo.city || !shippingInfo.zip) {
+      alert('Completa nombre, email, dirección, ciudad y código postal.');
+      return;
+    }
+
+    setPrintifyLoading(true);
+    setPrintifyError('');
+    setOrderStatus('Subiendo diseño y creando pedido en Printify...');
+    try {
+      const result = await fulfillPrintifyOrder({
+        imageUrl: generatedContent,
+        blueprintId: selectedProduct.blueprintId,
+        title: creativePrompt || selectedProduct.title,
+        size: selectedSize,
+        color: selectedColor,
+        variantId: selectedVariant?.id,
+        shipping: shippingInfo,
+      });
+      if (!result.success) {
+        setPrintifyError(result.error || 'Printify rechazó el pedido.');
+        setOrderStatus('');
+        return;
+      }
+      setOrderResult({ mockup: result.mockup, orderId: result.orderId });
+      setOrderStatus(`Pedido creado: ${result.orderId || 'ok'}`);
+      setShowCheckoutModal(false);
+      setShowStripeModal(true);
+    } catch (error) {
+      setPrintifyError(error instanceof Error ? error.message : 'Error al crear el pedido Printify.');
+      setOrderStatus('');
+    } finally {
+      setPrintifyLoading(false);
+    }
+  };
 
   const generateImageIA = async () => {
     if (!creativePrompt) return alert("Por favor, escribe lo que quieres crear.");
@@ -126,10 +215,7 @@ export default function HairyTools() {
     }
   };
 
-  const getPrice = () => {
-    if (!selectedProduct) return 0;
-    return selectedProduct.prices[selectedSize] || Object.values(selectedProduct.prices)[0];
-  };
+  const getPrice = () => selectedVariant?.price || 0;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans flex flex-col h-screen overflow-hidden">
@@ -233,8 +319,8 @@ export default function HairyTools() {
                    
                    {/* Flotante Printify Action */}
                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-                      <button onClick={() => setShowProductModal(true)} className="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-8 rounded-full shadow-xl hover:shadow-emerald-200 hover:-translate-y-1 transition-all flex items-center gap-3 uppercase text-sm border-none cursor-pointer">
-                         <i className="ri-printer-fill text-xl"></i> Imprimir Producto
+                      <button onClick={openPrintifyCatalog} className="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-8 rounded-full shadow-xl hover:shadow-emerald-200 hover:-translate-y-1 transition-all flex items-center gap-3 uppercase text-sm border-none cursor-pointer">
+                         <i className="ri-printer-fill text-xl"></i> Imprimir con Printify
                       </button>
                    </div>
                 </div>
@@ -248,29 +334,38 @@ export default function HairyTools() {
         </div>
       </main>
 
-      {/* Modales Product & Checkout (Reutilizados del sistema anterior, diseño unificado) */}
       {showProductModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
           <div className="bg-white rounded-3xl max-w-4xl w-full p-8 shadow-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
-               <h3 className="text-2xl font-black text-slate-800">Seleccionar Soporte</h3>
+               <h3 className="text-2xl font-black text-slate-800">Catálogo Printify</h3>
                <button onClick={() => setShowProductModal(false)} className="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer border-none bg-transparent">
                   <i className="ri-close-line text-2xl"></i>
                </button>
             </div>
+
+            {printifyLoading && (
+              <p className="text-sm text-indigo-600 font-bold mb-4">Conectando con Printify...</p>
+            )}
+            {printifyError && (
+              <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+                {printifyError}
+                <p className="mt-2 text-xs">Crea un token en Printify → My Profile → Connections, y configúralo como secreto <code>PRINTIFY_API_TOKEN</code> en Supabase.</p>
+              </div>
+            )}
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {productTypes.map(p => (
+              {printifyProducts.map(product => (
                 <div 
-                  key={p.id} 
+                  key={product.blueprintId} 
                   className="bg-white border-2 border-slate-100 rounded-2xl p-5 hover:border-indigo-500 transition-all cursor-pointer text-center group shadow-sm hover:shadow-md" 
-                  onClick={() => { setSelectedProduct(p); setShowProductModal(false); setShowCheckoutModal(true); }}
+                  onClick={() => selectPrintifyProduct(product)}
                 >
                   <div className="aspect-square bg-slate-50 rounded-xl mb-4 overflow-hidden">
-                     <img src={p.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={p.name} />
+                     <img src={product.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={product.title} />
                   </div>
-                  <p className="font-bold text-slate-800 mb-1">{p.name}</p>
-                  <p className="text-indigo-600 font-bold text-sm">Desde €{Object.values(p.prices)[0]}</p>
+                  <p className="font-bold text-slate-800 mb-1">{product.title}</p>
+                  <p className="text-slate-400 text-xs">{product.brand} {product.model}</p>
                 </div>
               ))}
             </div>
@@ -280,14 +375,31 @@ export default function HairyTools() {
 
       {showCheckoutModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-            <h2 className="text-xl font-black text-slate-800 mb-6 border-b border-slate-100 pb-4">Detalles Logísticos</h2>
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-black text-slate-800 mb-6 border-b border-slate-100 pb-4">Pedido Printify</h2>
             
             <div className="space-y-5">
+              {printifyOptions?.colors?.length ? (
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Color</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {printifyOptions.colors.map(color => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`px-3 py-2 rounded-xl font-bold text-xs border-2 transition-all cursor-pointer ${selectedColor === color ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-500 border-slate-200'}`}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
               <div>
-                 <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Talla Seleccionada</label>
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Talla</label>
                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                    {selectedProduct && Object.keys(selectedProduct.prices).map(size => (
+                    {(printifyOptions?.sizes || []).map(size => (
                       <button 
                        key={size}
                        onClick={() => setSelectedSize(size)}
@@ -299,15 +411,31 @@ export default function HairyTools() {
                  </div>
               </div>
 
-              <input type="text" placeholder="Nombre completo" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none focus:border-indigo-500 text-sm" />
-              <input type="text" placeholder="Dirección de entrega" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none focus:border-indigo-500 text-sm" />
+              <input type="text" placeholder="Nombre completo" value={shippingInfo.name} onChange={(e) => setShippingInfo({ ...shippingInfo, name: e.target.value })} className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none focus:border-indigo-500 text-sm" />
+              <input type="email" placeholder="Email" value={shippingInfo.email} onChange={(e) => setShippingInfo({ ...shippingInfo, email: e.target.value })} className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none focus:border-indigo-500 text-sm" />
+              <input type="text" placeholder="Teléfono" value={shippingInfo.phone} onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })} className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none focus:border-indigo-500 text-sm" />
+              <input type="text" placeholder="Dirección de entrega" value={shippingInfo.address} onChange={(e) => setShippingInfo({ ...shippingInfo, address: e.target.value })} className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none focus:border-indigo-500 text-sm" />
+              <div className="grid grid-cols-2 gap-3">
+                <input type="text" placeholder="Ciudad" value={shippingInfo.city} onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })} className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none focus:border-indigo-500 text-sm" />
+                <input type="text" placeholder="CP" value={shippingInfo.zip} onChange={(e) => setShippingInfo({ ...shippingInfo, zip: e.target.value })} className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none focus:border-indigo-500 text-sm" />
+              </div>
               
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-500 uppercase">Precio Total:</span>
-                <span className="text-xl font-black text-indigo-600">€{getPrice()}</span>
+                <span className="text-xs font-bold text-slate-500 uppercase">Precio venta:</span>
+                <span className="text-xl font-black text-indigo-600">€{getPrice().toFixed(2)}</span>
               </div>
 
+              {printifyError && <p className="text-sm text-red-600">{printifyError}</p>}
+              {orderStatus && <p className="text-sm text-emerald-700 font-bold">{orderStatus}</p>}
+
               <div className="pt-4 flex flex-col gap-3">
+                 <button 
+                   onClick={submitPrintifyOrder}
+                   disabled={printifyLoading}
+                   className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold text-sm hover:bg-emerald-700 transition-colors shadow-lg cursor-pointer border-none flex items-center justify-center gap-2 disabled:bg-slate-400"
+                 >
+                   <i className="ri-printer-fill text-lg"></i> {printifyLoading ? 'Creando en Printify...' : 'Crear pedido en Printify'}
+                 </button>
                  <button 
                    onClick={() => { 
                      setShowCheckoutModal(false); 
@@ -315,19 +443,17 @@ export default function HairyTools() {
                    }}
                    className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg cursor-pointer border-none flex items-center justify-center gap-2"
                  >
-                   <i className="ri-bank-card-line text-lg"></i> Pagar con Tarjeta (Stripe / Fiat)
+                   <i className="ri-bank-card-line text-lg"></i> Cobrar al cliente (Stripe)
                  </button>
                  
                  <button 
                    onClick={() => { 
                      setShowCheckoutModal(false); 
-                     // Redirigir a HairyWallet pre-rellenando el monto y la wallet de destino
                      navigate('/hairy-wallet/enviar', { 
                        state: { 
-                          // Simulamos conversión de EUR a SOL (ej: 1 SOL = ~150 EUR)
                           amount: (getPrice() / 150).toFixed(4), 
-                          recipient: "StoreWalletHairyPetShopDestination999999999", // Wallet pública de la tienda
-                          concept: `Pago por: ${selectedProduct?.name} (Talla: ${selectedSize})`
+                          recipient: "StoreWalletHairyPetShopDestination999999999",
+                          concept: `Pago por: ${selectedProduct?.title} (Talla: ${selectedSize})`
                        } 
                      });
                    }}
@@ -347,10 +473,10 @@ export default function HairyTools() {
       {showStripeModal && selectedProduct && (
         <StripePayment 
           product={{ 
-            id: selectedProduct.id, 
-            name: `${selectedProduct.name} (Talla: ${selectedSize})`, 
+            id: selectedProduct.blueprintId, 
+            name: `${selectedProduct.title} (Talla: ${selectedSize})`, 
             price: getPrice(), 
-            image: selectedProduct.image 
+            image: orderResult?.mockup || selectedProduct.image 
           }} 
           onClose={() => setShowStripeModal(false)} 
         />

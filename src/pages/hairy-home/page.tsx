@@ -115,7 +115,7 @@ export default function HairyHome() {
             </Link>
 
             <nav className="hidden md:flex items-center space-x-6">
-              <a href="#buscar" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
+              <a href="#contacto" onClick={() => setFormData({...formData, operationType: 'alquiler'})} className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
                 Buscar
               </a>
               <a href="#como-funciona" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
@@ -176,7 +176,8 @@ export default function HairyHome() {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <a
-                  href="#buscar"
+                  href="#contacto"
+                  onClick={() => setFormData({...formData, operationType: 'alquiler'})}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-full text-lg font-bold transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center space-x-2 shadow-lg"
                 >
                   <i className="ri-search-line"></i>
@@ -185,6 +186,7 @@ export default function HairyHome() {
                 
                 <a
                   href="#contacto"
+                  onClick={() => setFormData({...formData, operationType: 'compra'})}
                   className="bg-white hover:bg-gray-50 text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-full text-lg font-bold transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center space-x-2 shadow-lg"
                 >
                   <i className="ri-home-smile-line"></i>
@@ -194,7 +196,8 @@ export default function HairyHome() {
 
               <div className="mt-6">
                 <a
-                  href="#hoteles"
+                  href="#contacto"
+                  onClick={() => setFormData({...formData, operationType: 'hotel'})}
                   className="inline-flex items-center space-x-2 text-purple-600 hover:text-purple-700 font-semibold cursor-pointer"
                 >
                   <i className="ri-hotel-line"></i>
@@ -663,7 +666,7 @@ export default function HairyHome() {
                 <div className="bg-white rounded-3xl p-8 shadow-2xl">
                   <div className="flex items-center space-x-4 mb-6">
                     <img 
-                      src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" 
+                      src="/hairy-wallet-logo.png" 
                       alt="Hairy Wallet" 
                       className="w-16 h-16"
                     />
@@ -741,7 +744,7 @@ export default function HairyHome() {
               <h4 className="text-lg font-semibold mb-4">Enlaces</h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="#buscar" className="text-gray-400 hover:text-white transition-colors cursor-pointer">
+                  <a href="#contacto" onClick={() => setFormData({...formData, operationType: 'alquiler'})} className="text-gray-400 hover:text-white transition-colors cursor-pointer">
                     Buscar vivienda
                   </a>
                 </li>

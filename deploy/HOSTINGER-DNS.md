@@ -11,6 +11,8 @@ En el panel de Hostinger (Dominios → DNS), **borra** los registros que apuntan
 
 No toques los DNS de AutomaDrive ni de TaxiDriver.
 
+**n8n (Render), si lo vas a cerrar:** borra el CNAME `n8n` → `n8n-hairypetshop.onrender.com`. Luego en Render: Delete service `n8n-hairypetshop` (y `hairy-utils` / crons si existen). Eso ahorra el plan de Render (5 GB allí), no disco del VPS.
+
 Tras el cambio (5–30 min):
 - http://hairyelbicho.com → nginx del VPS → contenedor `hairypetshop-web` (`:8090`)
 - `/api/*` → API propia en Docker (`hairypetshop-api`)

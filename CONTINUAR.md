@@ -93,9 +93,10 @@ Detalle: `deploy/HOSTINGER-DNS.md`
    docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
    ```
    (O subir el tar como hoy y rebuild.)
-5. Completar Groq / Stripe / PayPal en `/opt/HairyPetShop/backend/.env` si health sigue en `false`.
-6. Seguir **Arkadium88 TaxiDriver** (proyecto aparte: `H:\Arkadium_TaxiDriver`) cuando HairyPetShop quede con DNS.
-7. AutomaDrive: más adelante, carpeta/puertos/compose propios. No mezclar con HairyPetShop.
+5. **n8n en Render:** Hostinger → borrar CNAME `n8n`. Render → Delete `n8n-hairypetshop` (+ `hairy-utils` y crons). `render.yaml` del repo ya no lo redepliega. Ahorra el plan de Render; **no** libera GB del VPS.
+6. Completar Groq / Stripe / PayPal en `/opt/HairyPetShop/backend/.env` si health sigue en `false`.
+7. Seguir **Arkadium88 TaxiDriver** (proyecto aparte: `H:\Arkadium_TaxiDriver`) cuando HairyPetShop quede con DNS.
+8. AutomaDrive: más adelante, carpeta/puertos/compose propios. No mezclar con HairyPetShop.
 
 ---
 

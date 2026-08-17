@@ -98,7 +98,7 @@ export default function WhatsAppBusinessFree() {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('🔔 Nuevo Lead Detectado', {
         body: `${newLead.name} está interesado en ${newLead.product}`,
-        icon: 'https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png'
+        icon: '/hairypetshop-logo.png'
       });
     }
 

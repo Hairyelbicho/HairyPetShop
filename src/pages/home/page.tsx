@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import StripePayment from '../../components/payments/StripePayment';
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, Keypair } from '@solana/web3.js';
+import MatrizBar from '../../components/layout/MatrizBar';
+import MainNav from '../../components/layout/MainNav';
+import { products, type Product } from '../../data/products';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -24,118 +26,7 @@ export default function Home() {
     }
   }, []);
 
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "Collar Premium para Perros (Cuero)",
-      price: 24.99,
-      originalPrice: 34.99,
-      discount: 29,
-      rating: 4.8,
-      reviews: 156,
-      category: "perros",
-      image: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400"
-    },
-    {
-      id: 2,
-      name: "Juguete Interactivo para Gatos (Láser)",
-      price: 18.50,
-      originalPrice: 25.00,
-      discount: 26,
-      rating: 4.9,
-      reviews: 203,
-      category: "gatos",
-      image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400"
-    },
-    {
-      id: 3,
-      name: "Acuario Completo 50L con LED",
-      price: 89.99,
-      originalPrice: 120.00,
-      discount: 25,
-      rating: 4.7,
-      reviews: 89,
-      category: "peces",
-      image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=400"
-    },
-    {
-      id: 4,
-      name: "Arenero Automático Autolimpiable",
-      price: 189.99,
-      originalPrice: 249.99,
-      discount: 24,
-      rating: 4.9,
-      reviews: 342,
-      category: "gatos",
-      image: "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400"
-    },
-    {
-      id: 5,
-      name: "Cama Ortopédica Viscoelástica XXL",
-      price: 55.00,
-      originalPrice: 79.99,
-      discount: 31,
-      rating: 4.9,
-      reviews: 512,
-      category: "perros",
-      image: "https://images.unsplash.com/photo-1541599540903-216a46ca1dc0?w=400"
-    },
-    {
-      id: 6,
-      name: "Dispensador de Comida WiFi con Cámara",
-      price: 75.99,
-      originalPrice: 105.00,
-      discount: 28,
-      rating: 4.8,
-      reviews: 289,
-      category: "perros",
-      image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400"
-    },
-    {
-      id: 7,
-      name: "Rascador Árbol Gigante para Gatos (170cm)",
-      price: 64.50,
-      originalPrice: 89.90,
-      discount: 28,
-      rating: 4.6,
-      reviews: 145,
-      category: "gatos",
-      image: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400"
-    },
-    {
-      id: 8,
-      name: "Correa Retráctil con Linterna LED",
-      price: 19.99,
-      originalPrice: 29.99,
-      discount: 33,
-      rating: 4.7,
-      reviews: 402,
-      category: "perros",
-      image: "https://images.unsplash.com/photo-1605639156481-244775d6f803?w=400"
-    },
-    {
-      id: 9,
-      name: "Jaula Espaciosa para Pájaros (Canarios/Loros)",
-      price: 45.00,
-      originalPrice: 60.00,
-      discount: 25,
-      rating: 4.5,
-      reviews: 78,
-      category: "pajaros",
-      image: "https://images.unsplash.com/photo-1552728089-571069502b48?w=400"
-    },
-    {
-      id: 10,
-      name: "Cámara de Seguridad para Mascotas HD",
-      price: 34.99,
-      originalPrice: 49.99,
-      discount: 30,
-      rating: 4.8,
-      reviews: 620,
-      category: "todos",
-      image: "https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?w=400"
-    }
-  ];
+  const featuredProducts = products;
 
   const categories = [
     { id: 'todos', name: 'Todos los productos', icon: 'ri-apps-line' },
@@ -164,7 +55,7 @@ export default function Home() {
     navigate('/hairy-wallet');
   };
 
-  const handlePurchase = (product: typeof featuredProducts[0]) => {
+  const handlePurchase = (product: Product) => {
     setCheckoutProduct(product);
     setShowCheckoutModal(true);
   };
@@ -174,30 +65,18 @@ export default function Home() {
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
+            <Link to="/" className="flex items-center space-x-3">
               <img 
-                src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" 
+                src="/hairypetshop-logo.png" 
                 alt="HairyPetShop Logo" 
                 className="w-10 h-10"
               />
               <h1 className="text-2xl font-bold text-blue-900" style={{ fontFamily: '"Pacifico", serif' }}>
                 HairyPetShop
               </h1>
-            </div>
+            </Link>
 
-            <nav className="hidden md:flex items-center space-x-8">
-              <a href="#productos" className="text-gray-700 hover:text-blue-900 transition-colors cursor-pointer">Productos</a>
-              <Link to="/automation-dashboard" className="text-gray-700 hover:text-blue-900 transition-colors cursor-pointer flex items-center space-x-1">
-                <i className="ri-robot-line"></i>
-                <span>Automatización</span>
-              </Link>
-              <Link to="/hairy-home" className="text-gray-700 hover:text-blue-900 transition-colors cursor-pointer">Hairy Home</Link>
-              <Link to="/hairy-tools" className="text-blue-600 font-bold hover:text-blue-900 transition-colors cursor-pointer flex items-center space-x-1">
-                <img src="/HairyTools_Icon.png" alt="Icon" className="w-6 h-6 rounded-md object-cover shadow-sm" />
-                <span>Hairy Tools</span>
-              </Link>
-              <Link to="/hairy-wallet" className="text-gray-700 hover:text-blue-900 transition-colors cursor-pointer">Hairy Wallet</Link>
-            </nav>
+            <MainNav />
 
             <div className="flex items-center gap-4">
               <button onClick={() => handleWhatsAppContact()} className="text-green-500 hover:text-green-600 cursor-pointer">
@@ -218,6 +97,14 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      <div className="bg-[#0f1219] text-gray-300 text-center text-xs md:text-sm py-2 px-4">
+        HairyPetShop es una división especializada de{' '}
+        <a href="https://arkadium88holdingssl.com" className="text-white font-semibold hover:underline" target="_blank" rel="noopener noreferrer">
+          Arkadium88 Holdings SL
+        </a>
+        , dedicada a la innovación en bienestar animal.
+      </div>
 
       <section className="relative bg-gradient-to-r from-blue-900 to-blue-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -285,16 +172,26 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12">🛒 Catálogo para Mascotas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {filteredProducts.map((product) => (
-              <div key={product.id} className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden relative">
+              <div key={product.id} className={`bg-white rounded-2xl shadow-lg border overflow-hidden relative ${product.ownBrand ? 'border-blue-900 ring-2 ring-blue-100' : 'border-gray-200'}`}>
+                {product.ownBrand && (
+                  <div className="absolute top-4 left-4 bg-blue-900 text-white px-3 py-1 rounded-full font-bold text-[10px] uppercase tracking-widest z-10">
+                    Línea propia · Delmocán
+                  </div>
+                )}
                 {product.discount > 0 && (
                   <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full font-bold text-sm z-10">
                     -{product.discount}%
                   </div>
                 )}
-                <img src={product.image} alt={product.name} className="w-full h-48 object-cover" />
+                <Link to={`/producto/${product.slug}`}>
+                  <img src={product.image} alt={product.name} className="w-full h-48 object-cover" />
+                </Link>
                 <div className="p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 min-h-[56px]">{product.name}</h3>
-                  <div className="flex items-center justify-between mb-4">
+                  <Link to={`/producto/${product.slug}`}>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1 min-h-[56px] hover:text-blue-800">{product.name}</h3>
+                  </Link>
+                  {product.shortTech && <p className="text-xs text-gray-500 mb-3">{product.shortTech}</p>}
+                  <div className="flex items-center justify-between mb-2">
                     <div className="text-left">
                       <span className="text-2xl font-bold text-blue-900">€{product.price}</span>
                       <p className="text-sm text-gray-500">~{(product.price / 150).toFixed(4)} SOL</p>
@@ -308,6 +205,9 @@ export default function Home() {
                       {isProcessing ? 'Procesando...' : 'Comprar'}
                     </button>
                   </div>
+                  <Link to={`/producto/${product.slug}`} className="text-xs font-semibold text-blue-800 hover:underline">
+                    {product.ownBrand ? 'Ver ficha técnica completa' : 'Ver ficha'}
+                  </Link>
                 </div>
               </div>
             ))}
@@ -328,21 +228,25 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div>
               <div className="flex items-center space-x-3 mb-6">
-                <img src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" alt="Logo" className="w-10 h-10 grayscale opacity-70" />
+                <img src="/hairypetshop-logo.png" alt="Logo" className="w-10 h-10 grayscale opacity-70" />
                 <h3 className="text-xl font-bold text-white font-serif">HairyPetShop</h3>
               </div>
               <p className="text-sm leading-relaxed mb-6">
-                Tu destino de confianza para productos premium, tecnología IA y pagos descentralizados.
+                HairyPetShop es una división especializada de Arkadium88 Holdings SL, dedicada a la innovación en bienestar animal.
               </p>
               <div className="mt-4 flex flex-col items-start bg-[#161b26] p-4 rounded-xl border border-gray-800">
                 <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3">Soporte Corporativo:</p>
                 <a href="mailto:hairyelbicho@gmail.com" className="text-orange-500 font-bold hover:underline mb-4 flex items-center gap-2">
                   <i className="ri-mail-send-line"></i> hairyelbicho@gmail.com
                 </a>
-                <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3">Una marca de:</p>
+                <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3">Matriz:</p>
                 <div className="flex items-center gap-3">
-                  <img src="/Arkadium-logo.jpg" alt="Arkadium88 Logo" className="w-16 h-16 rounded-lg object-contain bg-[#1a1f2e] border border-gray-700 p-1 shadow-lg" />
-                  <span className="font-bold text-gray-200 tracking-widest uppercase text-xs">Arkadium88 Holdings SL</span>
+                  <img src="/Arkadium-logo.jpg" alt="Arkadium88 Holdings SL" className="w-16 h-16 rounded-lg object-cover bg-[#1a1f2e] border border-gray-700 p-1 shadow-lg" />
+                  <div>
+                    <span className="font-bold text-gray-200 tracking-widest uppercase text-xs block">Arkadium88 Holdings SL</span>
+                    <a href="https://arkadium88holdingssl.com" target="_blank" rel="noopener noreferrer" className="text-[11px] text-gray-500 hover:text-gray-300">arkadium88holdingssl.com</a>
+                    <p className="text-[11px] text-gray-500">ark88@arkadium88holdingssl.com</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -350,7 +254,8 @@ export default function Home() {
             <div>
               <h4 className="text-white font-bold uppercase tracking-wider mb-6">Enlaces Rápidos</h4>
               <ul className="space-y-4">
-                <li><a href="#" className="hover:text-white transition-colors">Sobre Nosotros</a></li>
+                <li><Link to="/sobre-nosotros" className="hover:text-white transition-colors">Sobre Nosotros</Link></li>
+                <li><Link to="/partners" className="hover:text-white transition-colors">Partners / Proveedores</Link></li>
                 <li><a href="#productos" className="hover:text-white transition-colors">Catálogo</a></li>
                 <li><Link to="/hairy-tools" className="hover:text-white transition-colors">Hairy Tools (IA)</Link></li>
                 <li><Link to="/hairy-wallet" className="hover:text-white transition-colors">Hairy Wallet</Link></li>
@@ -382,9 +287,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-sm">
-            <p>&copy; 2026 Arkadium88 Holdings SL. Todos los derechos reservados.</p>
-          </div>
+          <MatrizBar product="HairyPetShop" />
         </div>
       </footer>
 

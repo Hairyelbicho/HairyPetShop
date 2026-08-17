@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { supabase } from '../../../utils/supabase';
+import { getWalletAddress } from '../../../utils/ownAuth';
 
 export default function QRPayment() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -13,18 +13,8 @@ export default function QRPayment() {
 
   const loadWallet = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from('wallet_addresses')
-        .select('address')
-        .eq('user_id', user.id)
-        .single();
-
-      if (data) {
-        setWalletAddress(data.address);
-      }
+      const address = await getWalletAddress();
+      if (address) setWalletAddress(address);
     } catch (error) {
       console.error('Error loading wallet:', error);
     } finally {

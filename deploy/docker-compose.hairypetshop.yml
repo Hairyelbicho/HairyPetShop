@@ -1,0 +1,18 @@
+# Postgres propio HairyPetShop (no usa el de DevStudio en :5432).
+services:
+  hairypetshop-db:
+    image: postgres:16-alpine
+    container_name: hairypetshop-db
+    environment:
+      POSTGRES_USER: hairy
+      POSTGRES_PASSWORD: ${HAIRYPETSHOP_DB_PASSWORD:-hairy_local_dev}
+      POSTGRES_DB: hairypetshop
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - hairypetshop_pg:/var/lib/postgresql/data
+      - ../backend/sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+
+volumes:
+  hairypetshop_pg:

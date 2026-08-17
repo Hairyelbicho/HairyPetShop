@@ -88,7 +88,7 @@ export default function RealTimeNotifications() {
     if (settings.browser && 'Notification' in window && Notification.permission === 'granted') {
       new Notification('🎉 ¡Nueva Venta!', {
         body: `${sale.customerName} compró ${sale.product} por €${sale.amount}`,
-        icon: 'https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png',
+        icon: '/hairypetshop-logo.png',
         tag: sale.id
       });
     }

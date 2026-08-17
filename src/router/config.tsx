@@ -17,11 +17,26 @@ const HairyWalletImportar = lazy(() => import('../pages/hairy-wallet-importar/pa
 const HairyWalletEnviar = lazy(() => import('../pages/hairy-wallet-enviar/page'));
 const HairyWalletRecibir = lazy(() => import('../pages/hairy-wallet-recibir/page'));
 const HairyWalletHistorial = lazy(() => import('../pages/hairy-wallet-historial/page'));
+const SobreNosotros = lazy(() => import('../pages/sobre-nosotros/page'));
+const Partners = lazy(() => import('../pages/partners/page'));
+const ProductoFicha = lazy(() => import('../pages/producto/page'));
 
 const routes: RouteObject[] = [
   {
     path: '/',
     element: <Home />,
+  },
+  {
+    path: '/sobre-nosotros',
+    element: <SobreNosotros />,
+  },
+  {
+    path: '/partners',
+    element: <Partners />,
+  },
+  {
+    path: '/producto/:slug',
+    element: <ProductoFicha />,
   },
   {
     path: '/hairy-tools',

@@ -1,0 +1,15 @@
+[Unit]
+Description=HairyPetShop own API (Groq, Printify, leads)
+After=network.target
+
+[Service]
+Type=simple
+User=hairy
+WorkingDirectory=/home/hairy/apps/HairyPetShop/backend
+ExecStart=/usr/bin/node server.mjs
+Restart=always
+RestartSec=3
+Environment=PORT=8787
+
+[Install]
+WantedBy=multi-user.target

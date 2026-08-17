@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { apiUrl } from '../../utils/ownApi';
 
 interface Product {
   id: number;
@@ -64,7 +65,7 @@ ${isPromotionActive ? '🎉 PROMOCIÓN INAUGURACIÓN ACTIVA - Comisión 20%' : '
   // Función para enviar datos a n8n automáticamente
   const sendSaleToN8N = async (paymentData: any) => {
     try {
-      await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/n8n-integration', {
+      await fetch(apiUrl('/api/n8n-integration'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +102,7 @@ ${isPromotionActive ? '🎉 PROMOCIÓN INAUGURACIÓN ACTIVA - Comisión 20%' : '
 
     try {
       // Crear orden de PayPal
-      const response = await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/paypal-create-payment', {
+      const response = await fetch(apiUrl('/api/paypal-create-payment'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

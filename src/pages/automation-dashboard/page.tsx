@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import AutoOrderSystem from '../../components/automation/AutoOrderSystem';
 import AutoPaymentProcessor from '../../components/automation/AutoPaymentProcessor';
 import AutoSupplierManager from '../../components/automation/AutoSupplierManager';
-import N8NIntegration from '../../components/automation/N8NIntegration';
+import HairyBotPanel from '../../components/automation/HairyBotPanel';
 import RealTimeNotifications from '../../components/notifications/RealTimeNotifications';
 import AutoSalesBot from '../../components/automation/AutoSalesBot';
 import WhatsAppBusinessFree from '../../components/automation/WhatsAppBusinessFree';
@@ -25,7 +25,7 @@ export default function AutomationDashboard() {
     { id: 'payments', name: 'Pagos', icon: 'ri-money-euro-circle-line' },
     { id: 'accounting', name: 'Contabilidad (Excel)', icon: 'ri-file-excel-line' },
     { id: 'suppliers', name: 'Proveedores', icon: 'ri-truck-line' },
-    { id: 'n8n', name: 'n8n Integration', icon: 'ri-links-line' },
+    { id: 'hairy-bot', name: 'HairyBot', icon: 'ri-robot-2-line' },
     { id: 'notifications', name: 'Notificaciones', icon: 'ri-notification-line' }
   ];
 
@@ -166,20 +166,18 @@ export default function AutomationDashboard() {
               </button>
 
               <button
-                onClick={() => setActiveTab('n8n')}
+                onClick={() => setActiveTab('hairy-bot')}
                 className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer text-left"
               >
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                    <i className="ri-links-line text-orange-600 text-xl"></i>
-                  </div>
+                  <img src="/hairy-bot.png" alt="HairyBot" className="w-12 h-12 rounded-full object-cover bg-[#c4a574] border border-gray-200" />
                   <div>
-                    <h4 className="font-semibold text-gray-900">n8n Integration</h4>
-                    <p className="text-sm text-gray-600">Workflows automáticos</p>
+                    <h4 className="font-semibold text-gray-900">HairyBot</h4>
+                    <p className="text-sm text-gray-600">IA Groq · catálogo tienda</p>
                   </div>
                 </div>
                 <div className="text-2xl font-bold text-orange-600 mb-1">ACTIVO</div>
-                <p className="text-xs text-gray-500">Conectado y funcionando</p>
+                <p className="text-xs text-gray-500">Talk with Us en toda la web</p>
               </button>
             </div>
 
@@ -218,7 +216,7 @@ export default function AutomationDashboard() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <i className="ri-check-line text-green-500"></i>
-                      <span>Sincronización n8n</span>
+                      <span>HairyBot Groq activo</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <i className="ri-check-line text-green-500"></i>
@@ -249,61 +247,57 @@ export default function AutomationDashboard() {
               </div>
             </div>
 
-            {/* NUEVO: Sección de n8n Workflows */}
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+            {/* HairyBot Groq */}
+            <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-200">
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <i className="ri-links-line text-white text-xl"></i>
-                </div>
+                <img src="/hairy-bot.png" alt="HairyBot" className="w-12 h-12 rounded-full object-cover bg-[#c4a574] border border-orange-200 flex-shrink-0" />
                 <div className="flex-1">
-                  <h5 className="font-semibold text-gray-900 mb-2">🔗 n8n Workflows Activos</h5>
+                  <h5 className="font-semibold text-gray-900 mb-2">HairyBot · Groq</h5>
                   <p className="text-gray-600 mb-4">
-                    Automatización completa conectada a tu workflow principal
+                    Asistente de la tienda: conoce el catálogo, Hairy Home, Hairy Tools, HairyWallet y la matriz Arkadium88 Holdings SL. Responde desde nuestra API (`/api/chat`), no desde n8n ni Readdy.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
                     <div className="flex items-center space-x-2">
                       <i className="ri-check-line text-green-500"></i>
-                      <span>Workflow ID: vCJbQTB5vj88tIxe</span>
+                      <span>Motor Groq Llama 3.3 70B</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <i className="ri-check-line text-green-500"></i>
-                      <span>Ventas automáticas</span>
+                      <span>Catálogo y precios de HairyPetShop</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <i className="ri-check-line text-green-500"></i>
-                      <span>Leads sincronizados</span>
+                      <span>Widget Talk with Us</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <i className="ri-check-line text-green-500"></i>
-                      <span>Webhooks activos</span>
+                      <span>WhatsApp +34 744 403 191</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <i className="ri-check-line text-green-500"></i>
-                      <span>Notificaciones WhatsApp</span>
+                      <span>Pagos Stripe, PayPal y SOL</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <i className="ri-check-line text-green-500"></i>
-                      <span>Telegram integrado</span>
+                      <span>API propia puerto 8787</span>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3">
                     <button
-                      onClick={() => {
-                        window.open('http://localhost:5678/workflow/vCJbQTB5vj88tIxe', '_blank');
-                      }}
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-2 rounded-lg font-medium transition-all cursor-pointer whitespace-nowrap"
+                      onClick={() => setActiveTab('hairy-bot')}
+                      className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-6 py-2 rounded-lg font-medium transition-all cursor-pointer whitespace-nowrap"
                     >
-                      Ver Workflow
+                      Ver HairyBot
                     </button>
                     <button
                       onClick={() => {
-                        const message = '🔗 Quiero optimizar mis workflows de n8n para generar más ventas automáticas. ¿Me ayudas a configurar automatizaciones más avanzadas?';
+                        const message = 'Hola Hairy, ¿qué productos me recomiendas para mi perro?';
                         const encodedMessage = encodeURIComponent(message);
                         window.open(`https://wa.me/34744403191?text=${encodedMessage}`, '_blank');
                       }}
-                      className="bg-white border-2 border-purple-500 text-purple-600 hover:bg-purple-50 px-6 py-2 rounded-lg font-medium transition-all cursor-pointer whitespace-nowrap"
+                      className="bg-white border-2 border-orange-500 text-orange-600 hover:bg-orange-50 px-6 py-2 rounded-lg font-medium transition-all cursor-pointer whitespace-nowrap"
                     >
-                      Optimizar Workflows
+                      Probar por WhatsApp
                     </button>
                   </div>
                 </div>
@@ -517,8 +511,8 @@ export default function AutomationDashboard() {
       case 'suppliers':
         return <AutoSupplierManager />;
       
-      case 'n8n':
-        return <N8NIntegration />;
+      case 'hairy-bot':
+        return <HairyBotPanel />;
       
       case 'notifications':
         return <RealTimeNotifications />;
@@ -566,7 +560,7 @@ export default function AutomationDashboard() {
             <div className="flex items-center space-x-4">
               <Link to="/" className="flex items-center space-x-3">
                 <img 
-                  src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" 
+                  src="/hairypetshop-logo.png" 
                   alt="PetStore Logo" 
                   className="w-10 h-10"
                 />

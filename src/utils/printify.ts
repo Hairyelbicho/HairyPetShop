@@ -1,5 +1,4 @@
-const supabaseUrl = import.meta.env.VITE_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY;
+import { ownApi } from './ownApi';
 
 export type PrintifyCatalogItem = {
   blueprintId: number;
@@ -32,25 +31,7 @@ export type PrintifyOptions = {
 };
 
 async function printifyRequest<T>(action: string, data?: unknown): Promise<T> {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Faltan VITE_PUBLIC_SUPABASE_URL o VITE_PUBLIC_SUPABASE_ANON_KEY.');
-  }
-
-  const response = await fetch(`${supabaseUrl}/functions/v1/printify-api`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: supabaseAnonKey,
-      Authorization: `Bearer ${supabaseAnonKey}`,
-    },
-    body: JSON.stringify({ action, data }),
-  });
-
-  const payload = await response.json();
-  if (!response.ok && payload?.error) {
-    throw new Error(payload.error);
-  }
-  return payload as T;
+  return ownApi<T>('/api/printify', { action, data });
 }
 
 export function getPrintifyStatus() {

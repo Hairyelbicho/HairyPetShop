@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { apiUrl } from '../../utils/ownApi';
 
 interface VisitorData {
   id: string;
@@ -27,7 +28,7 @@ export default function SmartLeadCapture() {
   // Función para enviar lead a n8n automáticamente
   const sendLeadToN8N = async (leadData: any) => {
     try {
-      await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/n8n-integration', {
+      await fetch(apiUrl('/api/n8n-integration'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ export default function SmartLeadCapture() {
   // Función para obtener mensaje de Luna IA
   const getLunaMessage = async (behavior: string) => {
     try {
-      const response = await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/ai-sales-agent', {
+      const response = await fetch(apiUrl('/api/ai-sales-agent'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -166,7 +167,7 @@ export default function SmartLeadCapture() {
 
     // Enviar notificación de lead capturado
     try {
-      await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/ai-sales-agent', {
+      await fetch(apiUrl('/api/ai-sales-agent'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

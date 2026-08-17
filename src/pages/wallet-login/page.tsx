@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../../utils/supabase';
+import { ownLogin } from '../../utils/ownAuth';
 
 export default function WalletLogin() {
   const navigate = useNavigate();
@@ -15,36 +15,13 @@ export default function WalletLogin() {
     setIsLoading(true);
 
     try {
-      // Login con Supabase
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // Obtener wallet del usuario desde Supabase
-        const { data: walletData, error: walletError } = await supabase
-          .from('wallet_addresses')
-          .select('*')
-          .eq('user_id', authData.user.id)
-          .single();
-
-        if (walletError) {
-          setError('No se encontró una wallet asociada a esta cuenta');
-          setIsLoading(false);
-          return;
-        }
-
-        // Guardar wallet en localStorage
-        localStorage.setItem('hairy_wallet_address', walletData.address);
-        localStorage.setItem('hairy_wallet_encrypted', walletData.encrypted_private_key);
-        localStorage.setItem('hairy_user_email', email);
-
-        // Redirigir a la wallet
-        navigate('/hairy-wallet');
+      const data = await ownLogin(email, password);
+      if (!data.wallet?.address && !localStorage.getItem('hairy_wallet_address')) {
+        setError('No se encontró una wallet asociada a esta cuenta');
+        setIsLoading(false);
+        return;
       }
+      navigate('/hairy-wallet');
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión');
     } finally {

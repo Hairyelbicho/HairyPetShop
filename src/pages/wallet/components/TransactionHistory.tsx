@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../utils/supabase';
+import { getWalletTransactions } from '../../../utils/ownAuth';
 
 interface Transaction {
   id: string;
@@ -23,19 +23,8 @@ export default function TransactionHistory() {
 
   const loadTransactions = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from('wallet_transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (data) {
-        setTransactions(data);
-      }
+      const data = await getWalletTransactions();
+      setTransactions((data as Transaction[]) || []);
     } catch (error) {
       console.error('Error loading transactions:', error);
     } finally {

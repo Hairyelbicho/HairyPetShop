@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { sanitizeInput, validateEmail, validatePhone, rateLimiter, generateCSRFToken, secureLog } from '../../utils/security';
+import { apiUrl, ownApi } from '../../utils/ownApi';
 
 interface Product {
   id: number;
@@ -100,12 +101,7 @@ ${isPromotionActive ? '🎉 PROMOCIÓN INAUGURACIÓN ACTIVA - Comisión 20%' : '
   // Función para enviar datos a n8n automáticamente
   const sendSaleToN8N = async (paymentData: any) => {
     try {
-      await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/n8n-integration', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      await ownApi('/api/n8n-integration', {
           action: 'send_sale_to_n8n',
           data: {
             productName: product.name,
@@ -118,8 +114,7 @@ ${isPromotionActive ? '🎉 PROMOCIÓN INAUGURACIÓN ACTIVA - Comisión 20%' : '
             supplierAmount: paymentData.supplierAmount,
             paymentIntentId: paymentData.paymentIntentId
           }
-        }),
-      });
+        });
       console.log('✅ Venta enviada a n8n automáticamente');
     } catch (error) {
       console.error('Error enviando venta a n8n:', error);
@@ -159,7 +154,7 @@ ${isPromotionActive ? '🎉 PROMOCIÓN INAUGURACIÓN ACTIVA - Comisión 20%' : '
       });
 
       // Crear PaymentIntent con Stripe
-      const response = await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/stripe-create-payment', {
+      const response = await fetch(apiUrl('/api/stripe-create-payment'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

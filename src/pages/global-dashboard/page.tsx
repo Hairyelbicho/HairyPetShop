@@ -611,7 +611,7 @@ export default function GlobalDashboard() {
             <div className="flex items-center space-x-4">
               <Link to="/" className="flex items-center space-x-3">
                 <img 
-                  src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" 
+                  src="/hairypetshop-logo.png" 
                   alt="PetStore Logo" 
                   className="w-10 h-10"
                 />

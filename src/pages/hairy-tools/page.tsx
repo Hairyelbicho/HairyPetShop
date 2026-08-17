@@ -237,7 +237,7 @@ export default function HairyTools() {
         </div>
       </header>
 
-      {/* Layout Readdy.ai (2 Columnas: Chat/Input Izquierda, Canvas Derecha) */}
+      {/* Estudio de diseño: chat a la izquierda, canvas a la derecha */}
       <main className="flex-1 flex gap-4 p-4 max-w-full overflow-hidden h-[calc(100vh-4rem)]">
         
         {/* Columna Izquierda: Input y Controles */}

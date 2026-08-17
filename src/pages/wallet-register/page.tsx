@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../../utils/supabase';
+import { ownRegister } from '../../utils/ownAuth';
 
 export default function WalletRegister() {
   const navigate = useNavigate();
@@ -28,22 +28,8 @@ export default function WalletRegister() {
     setIsLoading(true);
 
     try {
-      // Registrar usuario en Supabase
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (signUpError) throw signUpError;
-
-      if (data.user) {
-        // Guardar email temporalmente
-        localStorage.setItem('hairy_user_email', email);
-        localStorage.setItem('hairy_user_id', data.user.id);
-        
-        // Pasar al paso 2: crear o importar wallet
-        setStep(2);
-      }
+      await ownRegister(email, password);
+      setStep(2);
     } catch (err: any) {
       setError(err.message || 'Error al registrarse');
     } finally {

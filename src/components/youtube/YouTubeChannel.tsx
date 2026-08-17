@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { apiUrl } from '../../utils/ownApi';
 
 interface ChannelInfo {
   snippet: {
@@ -58,7 +59,7 @@ export default function YouTubeChannel() {
       
       // Cargar información del canal
       const channelResponse = await fetch(
-        'https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/youtube-api?action=channel-info'
+        apiUrl('/api/youtube-api?action=channel-info')
       );
       const channelData = await channelResponse.json();
       
@@ -68,7 +69,7 @@ export default function YouTubeChannel() {
       
       // Cargar videos del canal
       const videosResponse = await fetch(
-        'https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/youtube-api?action=videos&maxResults=12'
+        apiUrl('/api/youtube-api?action=videos&maxResults=12')
       );
       const videosData = await videosResponse.json();
       

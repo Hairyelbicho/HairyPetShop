@@ -1,0 +1,73 @@
+# HairyPetShop — stack propio, aislado de AutomaDrive y TaxiDriver.
+# Red Docker interna: hairypetshop. Postgres NO se publica al host.
+#
+# En el VPS actual (TaxiDriver ya ocupa :80/:443):
+#   cd /opt/HairyPetShop
+#   cp backend/.env.example backend/.env
+#   docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
+#
+# Preview: http://VPS:8090
+# Dominio: nginx del host (server_name hairyelbicho.com) → 127.0.0.1:8090
+
+name: hairypetshop
+
+services:
+  hairypetshop-web:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile.web
+    container_name: hairypetshop-web
+    ports:
+      - "${WEB_BIND:-0.0.0.0}:${WEB_PORT:-8090}:80"
+    depends_on:
+      - hairypetshop-api
+    networks:
+      - hairypetshop
+    restart: unless-stopped
+
+  hairypetshop-api:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile.api
+    container_name: hairypetshop-api
+    env_file:
+      - ../backend/.env
+    environment:
+      PORT: "8787"
+      DATABASE_URL: postgresql://hairy:${HAIRYPETSHOP_DB_PASSWORD:-hairy_local_dev}@hairypetshop-db:5432/hairypetshop
+    depends_on:
+      hairypetshop-db:
+        condition: service_healthy
+    networks:
+      - hairypetshop
+    restart: unless-stopped
+    expose:
+      - "8787"
+
+  hairypetshop-db:
+    image: postgres:16-alpine
+    container_name: hairypetshop-db
+    environment:
+      POSTGRES_USER: hairy
+      POSTGRES_PASSWORD: ${HAIRYPETSHOP_DB_PASSWORD:-hairy_local_dev}
+      POSTGRES_DB: hairypetshop
+    volumes:
+      - hairypetshop_pg:/var/lib/postgresql/data
+      - ../backend/sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - hairypetshop
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hairy -d hairypetshop"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+networks:
+  hairypetshop:
+    name: hairypetshop
+    driver: bridge
+
+volumes:
+  hairypetshop_pg:
+    name: hairypetshop_pg

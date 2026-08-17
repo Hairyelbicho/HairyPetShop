@@ -1,0 +1,12 @@
+node_modules
+dist
+backend/node_modules
+backend/data
+.git
+.env
+backend/.env
+*.tgz
+deploy/.env
+android
+ios
+.cursor

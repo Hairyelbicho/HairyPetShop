@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { ownApi } from '../../utils/ownApi';
 
 export default function HairyBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -80,47 +81,21 @@ export default function HairyBot() {
     setIsTyping(true);
 
     try {
-      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
-      
-      if (!apiKey) {
-         setMessages(prev => [...prev, { sender: 'bot', text: '⚠️ Hairy IA en pausa: Me falta la API Key de Groq en tu archivo .env (VITE_GROQ_API_KEY).' }]);
-         setIsTyping(false);
-         return;
-      }
-
-      // Preparamos el contexto para el LLM (últimos 8 mensajes para no saturar tokens)
       const chatHistory = newMessages.slice(-8).map(msg => ({
         role: msg.sender === 'user' ? 'user' : 'assistant',
         content: msg.text
       }));
 
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          temperature: 0.7,
-          max_tokens: 150,
-          messages: [
-            {
-              role: 'system',
-              content: 'Eres Hairy, el divertido y experto asistente inteligente del ecosistema Hairy (HairyPetShop y Hairy Home), propiedad de Arkadium88 Holdings SL. Eres entusiasta, hablas español neutro y eres experto en mascotas. Tus respuestas deben ser MUY BREVES (máximo 2-3 frases), directas. Si te preguntan por Hairy Home, alojamiento, alquileres u hoteles, explica que Hairy Home es nuestro buscador de propiedades y hoteles 100% pet-friendly donde las mascotas siempre son bienvenidas sin rechazos, sin letra pequeña. Si preguntan por productos, guíalos a la tienda HairyPetShop. Menciona que pueden pagar y ganar recompensas con HairyWallet (Solana).'
-            },
-            ...chatHistory
-          ]
-        })
+      const data = await ownApi<{ success: boolean; message?: string; error?: string }>('/api/chat', {
+        agent: 'hairy',
+        messages: chatHistory,
       });
-
-      const data = await response.json();
-      if (data.choices && data.choices.length > 0) {
-        const botReply = data.choices[0].message.content;
+      if (data.success && data.message) {
+        const botReply = data.message;
         setMessages(prev => [...prev, { sender: 'bot', text: botReply }]);
-        speakText(botReply); // Hairy habla en voz alta
+        speakText(botReply);
       } else {
-        throw new Error('Respuesta vacía de Groq');
+        throw new Error(data.error || 'Respuesta vacía');
       }
     } catch (error) {
       console.error("Groq AI Error:", error);
@@ -149,7 +124,7 @@ export default function HairyBot() {
            <div className="bg-[#1a1f2e] p-4 text-white flex justify-between items-center border-b-[3px] border-orange-500">
              <div className="flex items-center gap-3">
                <div className="relative">
-                 <img src="/HairyTools_Icon.png" className={`w-10 h-10 rounded-full bg-white object-cover border border-gray-600 ${isSpeakingText ? 'animate-talking ring-2 ring-orange-500' : ''}`} alt="Hairy AI" />
+                 <img src="/hairy-bot.png" className={`w-10 h-10 rounded-full bg-[#c4a574] object-cover border border-gray-600 ${isSpeakingText ? 'animate-talking ring-2 ring-orange-500' : ''}`} alt="Hairy AI" />
                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#1a1f2e] rounded-full"></span>
                </div>
                <div>
@@ -175,7 +150,7 @@ export default function HairyBot() {
              {messages.map((msg, i) => (
                <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.sender === 'bot' && (
-                     <img src="/HairyTools_Icon.png" className={`w-6 h-6 rounded-full self-end mb-1 mr-2 bg-white shadow-sm ${i === messages.length - 1 && isSpeakingText ? 'animate-talking' : ''}`} alt="Bot" />
+                     <img src="/hairy-bot.png" className={`w-6 h-6 rounded-full self-end mb-1 mr-2 bg-[#c4a574] shadow-sm object-cover ${i === messages.length - 1 && isSpeakingText ? 'animate-talking' : ''}`} alt="Bot" />
                   )}
                   <div className={`max-w-[80%] p-3 rounded-2xl text-sm shadow-sm ${msg.sender === 'user' ? 'bg-orange-500 text-white rounded-br-sm' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-sm'}`}>
                     {msg.text}
@@ -184,7 +159,7 @@ export default function HairyBot() {
              ))}
              {isTyping && (
                 <div className="flex justify-start items-end">
-                  <img src="/HairyTools_Icon.png" className="w-6 h-6 rounded-full self-end mb-1 mr-2 bg-white shadow-sm" alt="Bot" />
+                  <img src="/hairy-bot.png" className="w-6 h-6 rounded-full self-end mb-1 mr-2 bg-[#c4a574] shadow-sm object-cover" alt="Bot" />
                   <div className="bg-white border border-gray-200 p-3 rounded-2xl rounded-bl-sm shadow-sm flex gap-1 items-center">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -212,20 +187,22 @@ export default function HairyBot() {
          </div>
        )}
        
-       {/* Botón Flotante (Widget Cerrado) */}
+       {/* Botón flotante: sustituye el widget "Talk with Us" de Readdy */}
        {!isOpen && (
-         <button 
+         <button
            onClick={() => setIsOpen(true)}
-           className="w-16 h-16 rounded-full shadow-2xl overflow-visible hover:scale-110 transition-transform cursor-pointer flex items-center justify-center relative bg-white border-4 border-[#1a1f2e] group"
+           className="flex items-center gap-3 bg-black text-white rounded-full pl-1.5 pr-5 py-1.5 shadow-2xl hover:scale-105 transition-transform cursor-pointer border-none group"
+           aria-label="Talk with Us"
          >
-            {/* Tooltip Hover */}
-            <div className="absolute right-20 bg-[#1a1f2e] text-white text-xs font-bold px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              ¡Habla con Hairy IA!
-            </div>
-            {/* Indicador Activo */}
-            <span className="absolute top-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full z-10 animate-pulse"></span>
-            
-            <img src="/HairyTools_Icon.png" className="w-full h-full object-cover rounded-full" alt="Hairy IA Bot" />
+            <span className="relative flex-shrink-0">
+              <img
+                src="/hairy-bot.png"
+                className="w-12 h-12 rounded-full object-cover bg-[#c4a574] border-2 border-[#1a1f2e]"
+                alt="Hairy IA"
+              />
+              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-black rounded-full"></span>
+            </span>
+            <span className="font-bold text-sm whitespace-nowrap tracking-wide">Talk with Us</span>
          </button>
        )}
     </div>

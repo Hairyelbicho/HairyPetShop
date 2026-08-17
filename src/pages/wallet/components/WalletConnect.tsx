@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { supabase } from '../../../utils/supabase';
+import { deleteWalletAddress, getWalletAddress, saveWalletAddress } from '../../../utils/ownAuth';
 
 export default function WalletConnect() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -19,18 +19,8 @@ export default function WalletConnect() {
 
   const loadWalletFromDB = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('wallet_addresses')
-        .select('address')
-        .eq('user_id', user.id)
-        .single();
-
-      if (data && !error) {
-        setWalletAddress(data.address);
-      }
+      const address = await getWalletAddress();
+      if (address) setWalletAddress(address);
     } catch (error) {
       console.error('Error loading wallet:', error);
     }
@@ -63,19 +53,7 @@ export default function WalletConnect() {
       const response = await solana.connect();
       const address = response.publicKey.toString();
       setWalletAddress(address);
-
-      // Save to database
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('wallet_addresses')
-          .upsert({
-            user_id: user.id,
-            address: address,
-            wallet_type: 'phantom',
-            updated_at: new Date().toISOString()
-          });
-      }
+      await saveWalletAddress(address, 'phantom');
     } catch (error) {
       console.error('Error connecting Phantom:', error);
       alert('Error al conectar con Phantom Wallet');
@@ -92,15 +70,7 @@ export default function WalletConnect() {
       }
       setWalletAddress(null);
       setBalance(0);
-
-      // Remove from database
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('wallet_addresses')
-          .delete()
-          .eq('user_id', user.id);
-      }
+      await deleteWalletAddress();
     } catch (error) {
       console.error('Error disconnecting wallet:', error);
     }

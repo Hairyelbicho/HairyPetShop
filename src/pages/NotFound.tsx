@@ -14,7 +14,7 @@ export default function NotFound() {
         {/* Logo */}
         <div className="flex items-center justify-center space-x-3 mb-8">
           <img 
-            src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" 
+            src="/hairypetshop-logo.png" 
             alt="HairyPetShop Logo" 
             className="w-12 h-12"
             loading="lazy"
@@ -63,7 +63,14 @@ export default function NotFound() {
           <h3 className="font-semibold text-gray-900 mb-4">Enlaces útiles</h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <Link
-              to="/automation"
+              to="/partners"
+              className="text-blue-600 hover:text-blue-700 transition-colors cursor-pointer flex items-center space-x-1"
+            >
+              <i className="ri-handshake-line"></i>
+              <span>Partners</span>
+            </Link>
+            <Link
+              to="/automation-dashboard"
               className="text-blue-600 hover:text-blue-700 transition-colors cursor-pointer flex items-center space-x-1"
             >
               <i className="ri-robot-line"></i>
@@ -102,18 +109,22 @@ export default function NotFound() {
         </div>
 
         {/* Footer */}
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center flex flex-col items-center gap-3">
           <p className="text-gray-500 text-sm">
-            © 2024 HairyPetShop. Todos los derechos reservados.
+            © 2026 HairyPetShop. Todos los derechos reservados.
           </p>
-          <a 
-            href="https://readdy.ai/?origin=logo" 
-            className="text-gray-400 hover:text-gray-600 text-xs transition-colors"
+          <a
+            href="https://arkadium88holdingssl.com"
+            className="text-gray-400 hover:text-gray-600 text-xs transition-colors flex items-center gap-2"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Powered by Readdy
+            <img src="/Arkadium-logo.jpg" alt="Arkadium88 Holdings SL" className="w-6 h-6 rounded-full object-cover" />
+            Matriz · Arkadium88 Holdings SL
           </a>
+          <p className="text-gray-400 text-xs max-w-sm">
+            HairyPetShop es una división especializada de Arkadium88 Holdings SL, dedicada a la innovación en bienestar animal.
+          </p>
         </div>
       </div>
     </div>

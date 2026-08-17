@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../utils/supabase';
+import { ownLogout, ownSession } from '../../utils/ownAuth';
 import WalletConnect from './components/WalletConnect';
 import WalletBalance from './components/WalletBalance';
 import TransactionHistory from './components/TransactionHistory';
@@ -18,12 +18,12 @@ export default function WalletPage() {
 
   const checkUser = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      const sessionUser = await ownSession();
+      if (!sessionUser) {
         navigate('/wallet/login');
         return;
       }
-      setUser(session.user);
+      setUser(sessionUser);
     } catch (error) {
       console.error('Error checking user:', error);
       navigate('/wallet/login');
@@ -33,7 +33,7 @@ export default function WalletPage() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await ownLogout();
     navigate('/wallet/login');
   };
 

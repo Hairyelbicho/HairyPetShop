@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { apiUrl } from '../../utils/ownApi';
 
 interface SalesChannel {
   id: string;
@@ -159,7 +160,7 @@ export default function AutoSalesBot() {
 
     // Enviar notificación de venta automática
     try {
-      await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/ai-sales-agent', {
+      await fetch(apiUrl('/api/ai-sales-agent'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -186,7 +187,7 @@ export default function AutoSalesBot() {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('🤖 ¡Venta Automática con Luna IA!', {
         body: `${customer} compró ${product.name} por €${product.price} via ${platform}`,
-        icon: 'https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png'
+        icon: '/hairypetshop-logo.png'
       });
     }
 
@@ -197,35 +198,21 @@ export default function AutoSalesBot() {
     setIsGeneratingSale(true);
     
     try {
-      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
-      if (!apiKey) {
-        alert('⚠️ Por favor, configura tu API Key de Groq en el archivo .env (VITE_GROQ_API_KEY) para usar la IA en tiempo real.');
-        setIsGeneratingSale(false);
-        return;
-      }
-
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const response = await fetch(apiUrl('/api/chat'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            {
-              role: 'system',
-              content: 'Eres Luna, la especialista personal en mascotas de PetStore. Eres un bot avanzado impulsado por la API de Groq. Tu objetivo es vender productos para mascotas de forma muy amable, corta y entusiasta. Envía un saludo breve ofreciendo un descuento exclusivo.'
-            }
-          ]
+          agent: 'luna',
+          messages: [],
         }),
       });
 
       const result = await response.json();
       
-      if (result.choices && result.choices.length > 0) {
-        // Mostrar mensaje generado por Groq
-        alert(`🤖 Luna (Powered by Groq) dice:\n\n${result.choices[0].message.content}`);
+      if (result.success && result.message) {
+        alert(`🤖 Luna dice:\n\n${result.message}`);
         
         // Generar venta de prueba
         setTimeout(() => {

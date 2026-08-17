@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ownApi } from '../../utils/ownApi';
+import MatrizBar from '../../components/layout/MatrizBar';
 
 export default function HairyHome() {
   const [formData, setFormData] = useState({
@@ -15,11 +17,6 @@ export default function HairyHome() {
 
   const whatsappNumber = "+34744403191";
   const whatsappUrl = `https://wa.me/34744403191`;
-
-  // URLs configurables para integración
-  const N8N_WEBHOOK_URL = 'https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/n8n-integration';
-  const SUPABASE_REST_URL = 'https://lyurtjkckwggjlzgqyoh.supabase.co/rest/v1/smart_leads';
-  const READDY_AI_WEBHOOK_URL = 'https://readdy.ai/api/webhook/hairy-home';
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -41,33 +38,7 @@ export default function HairyHome() {
     };
 
     try {
-      // 1. Enviar a n8n
-      await fetch(N8N_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'send_lead_to_n8n',
-          data: leadData
-        })
-      });
-
-      // 2. Guardar en Supabase
-      await fetch(SUPABASE_REST_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify(leadData)
-      });
-
-      // 3. Enviar a Readdy.ai
-      await fetch(READDY_AI_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(leadData)
-      });
+      await ownApi('/api/leads', leadData);
 
       setSubmitSuccess(true);
       setFormData({
@@ -102,7 +73,7 @@ export default function HairyHome() {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-3">
               <img 
-                src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" 
+                src="/hairypetshop-logo.png" 
                 alt="Hairy Home Logo" 
                 className="w-10 h-10"
               />
@@ -121,12 +92,25 @@ export default function HairyHome() {
               <a href="#como-funciona" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
                 Cómo Funciona
               </a>
+              <Link to="/partners" className="text-blue-900 font-semibold hover:text-blue-700 transition-colors cursor-pointer">
+                Partners / Proveedores
+              </Link>
+              <Link to="/sobre-nosotros" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
+                Sobre nosotros
+              </Link>
               <a href="#beneficios" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
                 Beneficios
               </a>
               <a href="#contacto" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
                 Contacto
               </a>
+              <Link
+                to="/hairy-tools"
+                className="text-blue-600 font-bold hover:text-blue-900 transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <i className="ri-palette-line"></i>
+                Hairy Tools
+              </Link>
               <Link 
                 to="/hairy-wallet"
                 className="text-gray-700 hover:text-purple-600 transition-colors cursor-pointer flex items-center gap-1"
@@ -576,7 +560,7 @@ export default function HairyHome() {
               <div className="bg-blue-50 rounded-2xl p-4">
                 <p className="text-sm text-blue-900">
                   <i className="ri-information-line mr-2"></i>
-                  Al enviar, tu solicitud se guarda en Supabase y se envía a n8n y Readdy.ai para crear una respuesta automática y asignar un agente humano.
+                  Al enviar, tu solicitud se guarda en nuestro sistema para crear una respuesta automática y asignar un agente humano.
                 </p>
               </div>
 
@@ -726,7 +710,7 @@ export default function HairyHome() {
             <div className="md:col-span-1">
               <div className="flex items-center space-x-3 mb-4">
                 <img 
-                  src="https://static.readdy.ai/image/f9a9038def0140c9123e9ba49c8c1ced/0c2f33e0a05f2c11011f4287446eae74.png" 
+                  src="/hairypetshop-logo.png" 
                   alt="Hairy Home Logo" 
                   className="w-10 h-10"
                 />
@@ -738,6 +722,18 @@ export default function HairyHome() {
               <p className="text-gray-400 text-sm">
                 Tu hogar perfecto donde tu mascota siempre es bienvenida. 🐾
               </p>
+              <div className="mt-5 flex items-center gap-3 bg-gray-800/60 p-3 rounded-xl border border-gray-700">
+                <img
+                  src="/Arkadium-logo.jpg"
+                  alt="Arkadium88 Holdings SL"
+                  className="w-12 h-12 rounded-lg object-cover border border-gray-600 flex-shrink-0"
+                />
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Matriz</p>
+                  <p className="text-sm font-semibold">Arkadium88 Holdings SL</p>
+                  <p className="text-[11px] text-gray-400">ark88@arkadium88holdingssl.com</p>
+                </div>
+              </div>
             </div>
 
             <div>
@@ -762,6 +758,11 @@ export default function HairyHome() {
                   <a href="#contacto" className="text-gray-400 hover:text-white transition-colors cursor-pointer">
                     Contacto
                   </a>
+                </li>
+                <li>
+                  <Link to="/hairy-tools" className="text-gray-400 hover:text-white transition-colors cursor-pointer">
+                    Hairy Tools (IA + Printify)
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -829,28 +830,14 @@ export default function HairyHome() {
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-400 text-sm">
-                © 2024 Hairy Home. Todos los derechos reservados.
-              </p>
-              <a 
-                href="https://readdy.ai/?origin=logo" 
-                className="text-gray-500 hover:text-gray-400 text-sm transition-colors mt-2 md:mt-0"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Powered by Readdy
-              </a>
-            </div>
-          </div>
+          <MatrizBar product="Hairy Home" />
         </div>
       </footer>
 
       {/* WhatsApp Floating Button */}
       <button
         onClick={() => handleWhatsAppContact()}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 cursor-pointer z-50"
+        className="fixed bottom-24 right-6 w-16 h-16 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 cursor-pointer z-50"
         title="Contactar por WhatsApp"
       >
         <i className="ri-whatsapp-line text-3xl"></i>

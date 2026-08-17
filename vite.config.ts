@@ -18,5 +18,13 @@ export default defineConfig({
   define: {
     __BASE_PATH__: JSON.stringify('/')
   },
-  base: '/'
+  base: '/',
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8787',
+        changeOrigin: true,
+      },
+    },
+  },
 })

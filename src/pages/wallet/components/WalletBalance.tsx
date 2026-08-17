@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { supabase } from '../../../utils/supabase';
+import { getWalletAddress } from '../../../utils/ownAuth';
 
 export default function WalletBalance() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -14,18 +14,10 @@ export default function WalletBalance() {
 
   const loadWallet = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from('wallet_addresses')
-        .select('address')
-        .eq('user_id', user.id)
-        .single();
-
-      if (data) {
-        setWalletAddress(data.address);
-        await fetchBalance(data.address);
+      const address = await getWalletAddress();
+      if (address) {
+        setWalletAddress(address);
+        await fetchBalance(address);
       }
     } catch (error) {
       console.error('Error loading wallet:', error);

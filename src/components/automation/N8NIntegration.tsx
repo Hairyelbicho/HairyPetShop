@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiUrl } from '../../utils/ownApi';
 
 interface N8NWorkflow {
   id: string;
@@ -28,7 +29,7 @@ export default function N8NIntegration({ onClose }: N8NIntegrationProps) {
   const loadWorkflows = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/n8n-integration', {
+      const response = await fetch(apiUrl('/api/n8n-integration'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ export default function N8NIntegration({ onClose }: N8NIntegrationProps) {
   const syncCustomersToN8N = async () => {
     setSyncStatus('Sincronizando clientes con n8n...');
     try {
-      const response = await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/n8n-integration', {
+      const response = await fetch(apiUrl('/api/n8n-integration'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,7 +87,7 @@ export default function N8NIntegration({ onClose }: N8NIntegrationProps) {
   // Ejecutar workflow específico
   const triggerWorkflow = async (workflowId: string, workflowName: string) => {
     try {
-      const response = await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/n8n-integration', {
+      const response = await fetch(apiUrl('/api/n8n-integration'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +131,7 @@ export default function N8NIntegration({ onClose }: N8NIntegrationProps) {
         supplierAmount: 27.00
       };
 
-      const response = await fetch('https://lyurtjkckwggjlzgqyoh.supabase.co/functions/v1/n8n-integration', {
+      const response = await fetch(apiUrl('/api/n8n-integration'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

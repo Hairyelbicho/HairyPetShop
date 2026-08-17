@@ -123,7 +123,7 @@ export default function NotFound() {
             Matriz · Arkadium88 Holdings SL
           </a>
           <p className="text-gray-400 text-xs max-w-sm">
-            HairyPetShop es una división especializada de Arkadium88 Holdings SL, dedicada a la innovación en bienestar animal.
+            HairyPetShop es la plataforma de bienestar animal de Arkadium88 Holdings SL.
           </p>
         </div>
       </div>

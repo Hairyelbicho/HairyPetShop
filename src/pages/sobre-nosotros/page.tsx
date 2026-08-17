@@ -22,45 +22,41 @@ export default function SobreNosotros() {
       <section className="bg-[#0f1219] text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <p className="text-[11px] uppercase tracking-[0.25em] text-orange-400 font-bold mb-4">Arkadium88 Holdings SL</p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">Sobre nosotros</h2>
-          <p className="text-lg text-gray-300 leading-relaxed">
-            HairyPetShop es una división especializada de Arkadium88 Holdings SL, dedicada a la innovación en bienestar animal.
-          </p>
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">Sobre HairyPetShop y Arkadium88 Holdings SL</h2>
         </div>
       </section>
 
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 space-y-10">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Respaldo de holding</h3>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              HairyPetShop no opera como un e-commerce suelto. Forma parte de{' '}
-              <a href="https://arkadium88holdingssl.com" className="text-blue-800 font-semibold hover:underline" target="_blank" rel="noopener noreferrer">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10 space-y-5">
+            <p className="text-gray-700 leading-relaxed text-lg">
+              HairyPetShop es la división especializada en bienestar y nutrición animal de{' '}
+              <a href="https://arkadium88holdingssl.com" className="font-bold text-blue-900 hover:underline" target="_blank" rel="noopener noreferrer">
                 Arkadium88 Holdings SL
               </a>
-              , sociedad limitada española que agrupa tienda, Hairy Home, Hairy Tools y HairyWallet. Para un proveedor o una central de compras, eso implica interlocutor societario, contrato y continuidad.
+              . Como holding tecnológico, nuestra misión en Arkadium88 es transformar sectores tradicionales mediante la implementación de soluciones digitales avanzadas, automatización de procesos y optimización de la experiencia del cliente.
             </p>
+            <p className="text-gray-700 leading-relaxed">
+              En HairyPetShop, unimos esta capacidad tecnológica con nuestra pasión por los animales. Nos dedicamos a seleccionar y desarrollar soluciones de nutrición de alta calidad y productos inteligentes que facilitan el cuidado diario de las mascotas. Nuestra estructura, respaldada por la visión estratégica y el rigor operativo de{' '}
+              <span className="font-bold text-gray-900">Arkadium88 Holdings SL</span>, nos permite ofrecer un estándar de servicio superior, garantizando transparencia, innovación y confianza tanto para nuestros clientes finales como para nuestros socios estratégicos.
+            </p>
+          </div>
+
+          <div className="bg-blue-50 rounded-2xl border border-blue-100 p-8 md:p-10">
+            <h3 className="text-xl font-bold text-blue-900 mb-3">Visión</h3>
+            <p className="text-gray-700 leading-relaxed">
+              Nuestra visión es convertirnos en el referente tecnológico del sector retail en alimentación animal en España.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-gray-100 p-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Interlocutor societario</h3>
             <ul className="text-sm text-gray-600 space-y-2">
               <li><span className="font-semibold text-gray-800">Matriz:</span> Arkadium88 Holdings SL</li>
               <li><span className="font-semibold text-gray-800">Web corporativa:</span> arkadium88holdingssl.com</li>
               <li><span className="font-semibold text-gray-800">Correo matriz:</span> ark88@arkadium88holdingssl.com</li>
               <li><span className="font-semibold text-gray-800">Tienda:</span> hairyelbicho.com · WhatsApp +34 744 403 191</li>
             </ul>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h4 className="font-bold text-gray-900 mb-2">Qué hacemos</h4>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                Productos para mascotas, línea propia de nutrición con fábrica partner, diseño e impresión, hogares pet-friendly y pagos (tarjeta y Solana).
-              </p>
-            </div>
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h4 className="font-bold text-gray-900 mb-2">A quién nos dirigimos</h4>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                Familias, clínicas y, de forma expresa, fábricas, supermercados y distribuidores que quieran un partner de marca, no solo un pedido suelto.
-              </p>
-            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">

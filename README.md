@@ -1,4 +1,17 @@
-> **16 ago 2026 — para seguir mañana:** lee primero [`CONTINUAR.md`](./CONTINUAR.md). Ese archivo es el estado real del repo (HairyTools, Printify, web Readdy vs GitHub). Este README de abajo está desactualizado (habla de HairyWallet 1.0 / Electron).
+> **17 ago 2026 — para seguir mañana:** lee primero [`CONTINUAR.md`](./CONTINUAR.md). Ahí está lo hecho hoy (Docker en el VPS, Partners, holding, Printify, DNS Hostinger) y el orden de mañana.
+
+# HairyPetShop
+
+Tienda y ecosistema de bienestar animal. **HairyPetShop es la plataforma de bienestar animal de [Arkadium88 Holdings SL](https://arkadium88holdingssl.com)**, holding tecnológico.
+
+- Tienda: `/`
+- Sobre nosotros: `/sobre-nosotros`
+- Partners / Proveedores: `/partners`
+- Línea propia (ficha Delmocán): `/producto/hairy-nutrition-adulto-pollo-arroz`
+- Hairy Home, Hairy Tools, HairyWallet
+
+Despliegue Docker: `deploy/docker-compose.yml` (no usar el puerto 80 del host si TaxiDriver ya lo ocupa; por defecto `:8090`).
+
 
 # 🐾 HairyWallet - Tu Wallet de Solana
 

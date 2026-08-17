@@ -1,106 +1,112 @@
-# HairyPetShop — dónde lo dejamos (16 ago 2026)
+# HairyPetShop — punto de secuencia (17 ago 2026)
 
-Ábrelo mañana **antes de tocar código**. Este archivo es el mapa del proyecto, no el README de marketing (`README.md`).
+Ábrelo **mañana antes de tocar código**. Este archivo es el mapa de hoy; el README de marketing está en `README.md`.
 
 ## En 30 segundos
 
-- App React/Vite: tienda + HairyWallet (Solana) + Hairy Home + HairyTools + dashboards.
 - Carpeta: `H:\HairyPetShop`
-- Repo: https://github.com/Hairyelbicho/HairyPetShop (`main`)
-- **La web pública NO es este repo.** [hairyelbicho.com](https://www.hairyelbicho.com) sigue siendo un export viejo de **Readdy** (logo “Website Builder”). Por eso no se ve HairyTools.
-- Printify **sí está cableado en local** (sesión de hoy). Falta token API + desplegar la función de Supabase.
-- **No hay push a GitHub todavía** salvo que lo hagas mañana a propósito.
+- Repo: https://github.com/Hairyelbicho/HairyPetShop (`main`, actualizado hoy)
+- Stack propio: API Node `:8787` + Postgres (Docker en VPS). Ya no depende de Supabase/n8n/Readdy para el backend.
+- **hairyelbicho.com sigue en Vercel** (Readdy viejo, `76.76.21.21`) hasta que Hostinger apunte el DNS al VPS.
+- Preview VPS (Docker, no toca TaxiDriver): http://72.60.127.160:8090
+- Preview Pi (nginx `:8090`): http://192.168.1.167:8090
 
-Arranque local:
+Arranque local (PC):
 
 ```bash
 cd H:\HairyPetShop
 npm run dev
 ```
 
-Abre `http://localhost:5173` y `/hairy-tools`.
+API local (otra terminal): `cd backend && node server.mjs` (puerto 8787).
 
-`.env` local (NO commitear): `VITE_PUBLIC_SUPABASE_URL`, `VITE_PUBLIC_SUPABASE_ANON_KEY`, `VITE_GROQ_API_KEY`. No hay claves Printify.
-
----
-
-## Qué hicimos hoy (16 ago)
-
-1. Análisis: prototipo avanzado, parado desde mayo 2026. `package.json` se llama `"react"` / `0.0.0`. Electron/Capacitor están a medias. `node_modules` y `dist` siguen trackeados en git (problema viejo).
-2. Printify **no estaba instalado**. Solo un comentario y un botón falso en HairyTools.
-3. Se implementó Printify de verdad:
-   - `supabase/functions/printify-api/index.ts` — proxy (el token NO va al navegador)
-   - `src/utils/printify.ts` — cliente frontend
-   - `src/pages/hairy-tools/page.tsx` — botón **Imprimir con Printify**, catálogo, tallas/colores, envío, pedido
-4. Se revisó la web en vivo y GitHub:
-   - En **GitHub** sí existe `/hairy-tools` y el botón en la **home**.
-   - En **hairyelbicho.com** no hay HairyTools. `/hairy-home` cambia la URL pero sigue mostrando la tienda.
-   - Hairy Home (código) **no tiene** enlace a HairyTools.
-   - La API Printify de hoy **no estaba en GitHub** hasta este commit local.
+No commitear `.env` ni `backend/.env`.
 
 ---
 
-## Printify — siguiente paso (bloquea pedidos reales)
+## Qué se hizo hoy (17 ago)
 
-Hace falta cuenta Printify + token. **No pongas el token en `.env` con `VITE_`.**
+1. **Docker en el VPS actual** (`72.60.127.160`), aislado de TaxiDriver:
+   - Carpeta `/opt/HairyPetShop`
+   - Contenedores: `hairypetshop-web` (:8090), `hairypetshop-api`, `hairypetshop-db`
+   - Red Docker `hairypetshop`. Postgres **no** se publica al host.
+   - Nginx del VPS: vhost `hairyelbicho.com` → `127.0.0.1:8090` (sin tocar `taxidriver.conf`).
+   - Disco VPS tras el stack: **29 GB usados / 19 GB libres** de 48 GB (antes 28/21). RAM ~3,8 GB, ~2,7 disponibles.
 
-1. Cuenta y shop: https://printify.com/app/register
-2. Token: My Profile → Connections. Permisos: shops, catalog, products, uploads, orders, print_providers.
-3. En Supabase (proyecto ya usado: `lyurtjkckwggjlzgqyoh`):
+2. **Autoridad de holding y canal B2B**
+   - `/sobre-nosotros` — texto corporativo + visión retail alimentación animal en España.
+   - Pie: *HairyPetShop | Una marca de **Arkadium88 Holdings SL*** + copyright de la SL.
+   - Menú **Partners / Proveedores** (`/partners`) — formulario B2B (empresa, CIF, propuesta) → `/api/leads` origen `partners`.
+   - Ficha técnica línea propia Delmocán: `/producto/hairy-nutrition-adulto-pollo-arroz`
+   - Logo propio `/hairypetshop-logo.png` (sin CDN Readdy).
 
-```bash
-npx supabase secrets set PRINTIFY_API_TOKEN=EL_TOKEN PRINTIFY_SHOP_ID=EL_SHOP_ID
-npx supabase functions deploy printify-api
-```
+3. **Printify** ya no va por Supabase. Token en `backend/.env` como `PRINTIFY_API_TOKEN` (y opcional `PRINTIFY_SHOP_ID`). En el VPS:
+   ```bash
+   nano /opt/HairyPetShop/backend/.env
+   cd /opt/HairyPetShop && docker compose -f deploy/docker-compose.yml --env-file deploy/.env restart hairypetshop-api
+   curl -s http://127.0.0.1:8090/api/health   # debe printify:true
+   ```
+   Si el token se pegó hoy, comprobar health mañana. **No pegar el token en el chat.**
 
-`PRINTIFY_SHOP_ID` es opcional: si falta, usa el primer shop activo.
+4. **Pi** sincronizada y build OK (`/home/hairy/apps/HairyPetShop`). AutomaDrive en la Pi **no se tocó** (`:80`).
 
-Flujo: el cliente paga a Hairy (Stripe/SOL); Printify cobra **a la cuenta comerciante**. Son dos cobros.
-
-Hasta que no esté el secreto + deploy, HairyTools dirá que Printify no está configurado.
+5. **GitHub** `main` con API propia, Docker, Partners y fichas.
 
 ---
 
-## Tres copias distintas (no las mezcles)
+## Tres orígenes (no mezclar)
 
-| Sitio | Qué es | HairyTools | Printify API |
-|---|---|---|---|
-| [hairyelbicho.com](https://www.hairyelbicho.com) | Readdy viejo | No | No |
-| GitHub `main` (antes de hoy) | Código Vite | Página + botón en home | Solo maqueta Unsplash |
-| Disco `H:\HairyPetShop` | Trabajo de hoy | Página + Printify real | Función lista, sin token |
+| Sitio | Qué es ahora |
+|---|---|
+| hairyelbicho.com | Sigue Vercel/Readdy hasta cambiar DNS en Hostinger |
+| VPS Docker `:8090` | Código de hoy (holding, partners, fichas) |
+| Pi `:8090` | Misma línea de código; también corre AutomaDrive en `:80` |
+| GitHub `main` | Alineado con el trabajo de hoy |
 
-Mañana, si quieres que se vea en el dominio: publicar **este** repo (Vercel/Netlify) contra `hairyelbicho.com`, no reeditar Readdy a ciegas. Hay que SPA rewrite (`/hairy-home`, `/hairy-tools` → `index.html`).
+TaxiDriver: `/root/arkadium_matriz` en el **mismo VPS**, red y puertos distintos. No mezclar carpetas.
+
+---
+
+## DNS Hostinger (pendiente — lo hace él a mano)
+
+Borrar A/CNAME de Vercel. Dejar:
+
+| Tipo | Nombre | Destino |
+|------|--------|---------|
+| A | `@` | `72.60.127.160` |
+| A | `www` | `72.60.127.160` |
+
+Cuando resuelva al VPS: `certbot --nginx -d hairyelbicho.com -d www.hairyelbicho.com`
+
+Detalle: `deploy/HOSTINGER-DNS.md`
 
 ---
 
 ## Mañana, por orden
 
-1. Abrir este archivo. `npm run dev`. Probar `/hairy-tools`.
-2. Crear token Printify y desplegar `printify-api`.
-3. Poner botón HairyTools también en `src/pages/hairy-home/page.tsx` (ahora no está).
-4. Decidir publicación: Vercel con este repo vs seguir en Readdy.
-5. Seguridad pendiente (no bloquea el arranque):
-   - Rotar tokens que están en claro en `TELEGRAM_INTEGRATION.md` y en edge functions de Telegram.
-   - Wallet: mnemonic/`secretKey` en `localStorage` con `btoa` (no es cifrado). No usar mainnet con fondos reales así.
-   - Quitar `node_modules`/`dist` del git cuando haya tiempo (`git rm -r --cached node_modules dist`).
-   - No commitear `.env`.
-
-No hace falta Electron ni Capacitor para mañana.
-
----
-
-## Archivos clave
-
-- Tienda: `src/pages/home/page.tsx`
-- Hairy Home: `src/pages/hairy-home/page.tsx`
-- HairyTools + Printify UI: `src/pages/hairy-tools/page.tsx`
-- Rutas: `src/router/config.tsx`
-- Printify cliente: `src/utils/printify.ts`
-- Printify backend: `supabase/functions/printify-api/index.ts`
-- Bot chat (Groq): `src/components/chat/HairyBot.tsx`
-
-Comandos: `npm run dev` / `npm run build`. Los scripts `electron:*` del README viejo **no existen** en `package.json`.
+1. Leer este archivo.
+2. **Printify:** si anoche se pegó el token, `curl -s http://127.0.0.1:8090/api/health` en el VPS y probar Hairy Tools → Imprimir con Printify.
+3. **Hostinger DNS** → VPS. Luego HTTPS (certbot). Hasta entonces el dominio público sigue siendo Readdy.
+4. Reconstruir Docker del VPS si hace falta (Sobre nosotros / pie de esta noche):
+   ```bash
+   cd /opt/HairyPetShop
+   docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
+   ```
+   (O subir el tar como hoy y rebuild.)
+5. Completar Groq / Stripe / PayPal en `/opt/HairyPetShop/backend/.env` si health sigue en `false`.
+6. Seguir **Arkadium88 TaxiDriver** (proyecto aparte: `H:\Arkadium_TaxiDriver`) cuando HairyPetShop quede con DNS.
+7. AutomaDrive: más adelante, carpeta/puertos/compose propios. No mezclar con HairyPetShop.
 
 ---
 
-Última sesión: 16 ago 2026, ~16:30. Paramos aquí. Continuar por **Printify token + deploy**, no por más features.
+## Apagar al cerrar el día
+
+| Qué | ¿Se puede apagar? |
+|---|---|
+| **Raspberry Pi** | Sí para HairyPetShop (el origen 24/7 previsto es el VPS). **No** si quieres que AutomaDrive siga en línea esta noche. |
+| **Docker Desktop (PC)** | Sí. El stack de producción está en el VPS, no en el PC. |
+| **VPS** | **No.** Ahí están TaxiDriver y HairyPetShop Docker. |
+| **Este chat** | Sí, cuando Git esté guardado. Mañana abre `CONTINUAR.md`. |
+
+SSH VPS: `root@72.60.127.160` (clave `arkadium_vps_ed25519`).  
+SSH Pi: `hairy@192.168.1.167` — app en `/home/hairy/apps/HairyPetShop`.

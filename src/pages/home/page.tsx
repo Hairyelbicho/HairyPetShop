@@ -99,11 +99,10 @@ export default function Home() {
       </header>
 
       <div className="bg-[#0f1219] text-gray-300 text-center text-xs md:text-sm py-2 px-4">
-        HairyPetShop es una división especializada de{' '}
-        <a href="https://arkadium88holdingssl.com" className="text-white font-semibold hover:underline" target="_blank" rel="noopener noreferrer">
+        HairyPetShop | Una marca de{' '}
+        <a href="https://arkadium88holdingssl.com" className="text-white font-bold hover:underline" target="_blank" rel="noopener noreferrer">
           Arkadium88 Holdings SL
         </a>
-        , dedicada a la innovación en bienestar animal.
       </div>
 
       <section className="relative bg-gradient-to-r from-blue-900 to-blue-800 text-white py-20">
@@ -232,7 +231,8 @@ export default function Home() {
                 <h3 className="text-xl font-bold text-white font-serif">HairyPetShop</h3>
               </div>
               <p className="text-sm leading-relaxed mb-6">
-                HairyPetShop es una división especializada de Arkadium88 Holdings SL, dedicada a la innovación en bienestar animal.
+                HairyPetShop es la plataforma de bienestar animal de{' '}
+                <span className="font-bold text-gray-200">Arkadium88 Holdings SL</span>, un holding tecnológico dedicado a la innovación y digitalización de soluciones de mercado. Apostamos por la calidad, la automatización y la excelencia en cada uno de nuestros proyectos.
               </p>
               <div className="mt-4 flex flex-col items-start bg-[#161b26] p-4 rounded-xl border border-gray-800">
                 <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3">Soporte Corporativo:</p>

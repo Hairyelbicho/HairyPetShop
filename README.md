@@ -1,4 +1,4 @@
-> **17 ago 2026 — para seguir mañana:** lee primero [`CONTINUAR.md`](./CONTINUAR.md). Ahí está lo hecho hoy (Docker en el VPS, Partners, holding, Printify, DNS Hostinger) y el orden de mañana.
+> **18 ago 2026 — para seguir:** lee primero [`CONTINUAR.md`](./CONTINUAR.md). DNS de hairyelbicho.com ya apunta al VPS; **HTTPS está pendiente** (certbot). Primera tarea: certificado Let’s Encrypt.
 
 # HairyPetShop
 

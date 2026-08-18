@@ -1,4 +1,4 @@
-> **18 ago 2026 — para seguir:** lee primero [`CONTINUAR.md`](./CONTINUAR.md). DNS de hairyelbicho.com ya apunta al VPS; **HTTPS está pendiente** (certbot). Primera tarea: certificado Let’s Encrypt.
+> **18 ago 2026 — HTTPS listo** en [`CONTINUAR.md`](./CONTINUAR.md). `https://hairyelbicho.com` usa certificado Let’s Encrypt propio.
 
 # HairyPetShop
 

@@ -13,17 +13,10 @@ No toques los DNS de AutomaDrive ni de TaxiDriver.
 
 **n8n (Render), si lo vas a cerrar:** borra el CNAME `n8n` → `n8n-hairypetshop.onrender.com`. Luego en Render: Delete service `n8n-hairypetshop` (y `hairy-utils` / crons si existen). Eso ahorra el plan de Render (5 GB allí), no disco del VPS.
 
-**Estado 17 ago noche:** `@` y `www` ya resuelven a `72.60.127.160`. HTTP sirve HairyPetShop.
+**Estado 18 ago tarde:** `@` y `www` → `72.60.127.160`. **HTTPS listo** (Let’s Encrypt, caduca 16 nov 2026). `https://hairyelbicho.com` y `www` sirven HairyPetShop. HTTP redirige a HTTPS.
 
-**HTTPS pendiente:** el :443 del VPS sigue mostrando el certificado de `taxidriver.arkadium88holdingssl.com` → `NET::ERR_CERT_COMMON_NAME_INVALID`. Emitir con `deploy/issue-letsencrypt.sh` o:
-
-```bash
-certbot --nginx -d hairyelbicho.com -d www.hairyelbicho.com --non-interactive --agree-tos --email ark88@arkadium88holdingssl.com --redirect
-```
-
-Tras el cambio:
-- http://hairyelbicho.com → nginx del VPS → contenedor `hairypetshop-web` (`:8090`)
+- http://hairyelbicho.com → 301 → HTTPS
 - `/api/*` → API propia en Docker (`hairypetshop-api`)
-- https://hairyelbicho.com → el mismo vhost, **después** de certbot
+- https://hairyelbicho.com → nginx del VPS → `hairypetshop-web` (`:8090`)
 
 Preview sin DNS: `http://72.60.127.160:8090`

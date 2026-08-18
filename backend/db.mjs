@@ -82,7 +82,16 @@ export async function readBody(req) {
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);
   const raw = Buffer.concat(chunks).toString('utf8');
-  return raw ? JSON.parse(raw) : {};
+  if (!raw) return {};
+  const ct = String(req.headers['content-type'] || '').toLowerCase();
+  if (ct.includes('application/x-www-form-urlencoded')) {
+    return Object.fromEntries(new URLSearchParams(raw));
+  }
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return Object.fromEntries(new URLSearchParams(raw));
+  }
 }
 
 export function bearerToken(req) {

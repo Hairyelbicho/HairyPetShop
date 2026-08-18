@@ -1,0 +1,14 @@
+---
+description: Telefonía Arkadium — MundoSMS, nunca Twilio. Groq cierra ventas.
+alwaysApply: true
+---
+
+# Telefonía y voz
+
+- **Nunca Twilio.** Ni en código, ni en planes, ni como fallback.
+- Telefonía y SMS: **MundoSMS** (VozPush + centralita + SMS API).
+- Número del grupo: **+34 848 681 101** (`34848681101`). Centralita PRO.
+- Motor de conversación: **siempre Groq** (Whisper STT + Llama). TTS español: voces de MundoSMS cuando baste.
+- Tras un formulario con consentimiento, el bot **llama y cierra** (pago Stripe/PayPal/enlace SMS). No transfiere a comercial.
+- Capa **adicional** a HairyBot de texto; no lo sustituye.
+- Credenciales MundoSMS solo en `.env`, nunca en el chat ni en git.

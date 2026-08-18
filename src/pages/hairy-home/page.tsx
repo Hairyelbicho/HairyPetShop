@@ -34,6 +34,7 @@ export default function HairyHome() {
       source: 'hairy_home',
       interest: `${formData.operationType} - ${formData.city}`,
       message: formData.message,
+      consent_call: false,
       created_at: new Date().toISOString()
     };
 
@@ -560,7 +561,7 @@ export default function HairyHome() {
               <div className="bg-blue-50 rounded-2xl p-4">
                 <p className="text-sm text-blue-900">
                   <i className="ri-information-line mr-2"></i>
-                  Al enviar, tu solicitud se guarda en nuestro sistema para crear una respuesta automática y asignar un agente humano.
+                  Guardamos tu solicitud. En la tienda (inicio) o en Hairy IA puedes pedir que te llame el asistente desde 848 681 101.
                 </p>
               </div>
 

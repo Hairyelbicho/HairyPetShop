@@ -13,6 +13,7 @@ ECOSISTEMA:
 
 CONTACTO:
 - WhatsApp: +34 744 403 191
+- Llamada del asistente: desde +34 848 681 101 (MundoSMS). Si el cliente deja teléfono y consentimiento, el bot le llama y cierra con SMS de pago. No hay comercial.
 - Tienda: info@hairypetshop.com
 - Hairy Home: home@hairyelbicho.com
 - Web: hairyelbicho.com

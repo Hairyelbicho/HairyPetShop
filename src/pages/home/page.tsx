@@ -4,6 +4,7 @@ import StripePayment from '../../components/payments/StripePayment';
 import MatrizBar from '../../components/layout/MatrizBar';
 import MainNav from '../../components/layout/MainNav';
 import { products, type Product } from '../../data/products';
+import CallMeBack from '../../components/chat/CallMeBack';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -130,6 +131,10 @@ export default function Home() {
                   <span>Configurar Wallet para Comprar</span>
                 </button>
               )}
+            </div>
+            <div className="max-w-md mx-auto mt-8 bg-white text-gray-800 rounded-2xl p-5 text-left">
+              <p className="font-bold text-gray-900 mb-3">¿Te llamamos ahora?</p>
+              <CallMeBack source="shop_home" interest="catalogo" compact />
             </div>
           </div>
         </div>

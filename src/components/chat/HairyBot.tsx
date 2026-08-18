@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ownApi } from '../../utils/ownApi';
+import CallMeBack from './CallMeBack';
 
 export default function HairyBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +11,7 @@ export default function HairyBot() {
   const [isTyping, setIsTyping] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakingText, setIsSpeakingText] = useState(false);
+  const [showCallForm, setShowCallForm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const synth = window.speechSynthesis;
 
@@ -171,7 +173,20 @@ export default function HairyBot() {
            </div>
            
            {/* Input Area */}
-           <div className="p-3 bg-white border-t border-gray-100 flex gap-2">
+           <div className="p-3 bg-white border-t border-gray-100 flex flex-col gap-2">
+             {showCallForm ? (
+               <div className="px-1 pb-1">
+                 <CallMeBack source="hairybot" compact />
+                 <button
+                   type="button"
+                   onClick={() => setShowCallForm(false)}
+                   className="mt-2 text-xs text-gray-500 bg-transparent border-none cursor-pointer"
+                 >
+                   Volver al chat
+                 </button>
+               </div>
+             ) : (
+               <>
              <input 
                type="text" 
                placeholder="Escribe tu mensaje a Hairy..." 
@@ -180,9 +195,20 @@ export default function HairyBot() {
                onKeyDown={e => e.key === 'Enter' && handleSend()}
                className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-orange-500 text-sm transition-colors"
              />
+             <div className="flex gap-2">
+             <button
+               type="button"
+               onClick={() => setShowCallForm(true)}
+               className="flex-1 text-xs font-bold text-[#1a1f2e] bg-orange-100 rounded-xl py-2 border-none cursor-pointer"
+             >
+               Te llamamos
+             </button>
              <button onClick={handleSend} disabled={!input.trim() || isTyping} className="bg-[#1a1f2e] text-orange-500 disabled:opacity-50 w-10 h-10 rounded-xl flex items-center justify-center hover:bg-black transition-colors cursor-pointer border-none shadow-md">
                 <i className="ri-send-plane-fill text-lg"></i>
              </button>
+             </div>
+               </>
+             )}
            </div>
          </div>
        )}

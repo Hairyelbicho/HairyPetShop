@@ -1,6 +1,15 @@
-# HairyPetShop — punto de secuencia (18 ago 2026, tarde)
+# HairyPetShop — punto de secuencia (18 ago 2026, 16:55)
 
 Ábrelo **antes de tocar código**. Este archivo es el mapa. El README de marketing (HairyWallet) está en `README.md`.
+
+## Chequeo 18 ago 16:55
+
+- **https://hairyelbicho.com está en línea.** Certificado Let’s Encrypt propio (`hairyelbicho.com` + `www`, caduca **16 nov 2026**). HTTP → HTTPS 301.
+- Postgres de la API: **true**.
+- **Producción NO tiene el código de esta tarde.** Home Last-Modified **17 ago**. Health sin `mundosms`/`voice_from`. `GET /api/voice/mundosms` → **404**. Groq/Printify/Stripe/PayPal → **false**.
+- Rutas locales que en prod dan 404 del React: `/sobre-nosotros`, `/partners`, ficha Delmocán.
+- PC: commit `4ca84372`, `main` 2 commits por delante de GitHub (sin push). No hay `backend/.env` en el PC.
+- SSH al VPS no contestó en esta sesión: el rebuild sigue pendiente.
 
 ## En 30 segundos
 
@@ -51,18 +60,21 @@ En TaxiDriver: `MUNDOSMS_VOICE_WEBHOOK=https://taxidriver.arkadium88holdingssl.c
 
 ## Al volver
 
-1. Leer este archivo.
-2. Comprobar `https://hairyelbicho.com` (ventana privada si el navegador cachea el candado).
-3. Poner credenciales MundoSMS en `.env` y probar «Te llamamos» (casilla de consentimiento).
-4. En el panel MundoSMS, HTTP de la centralita/VozPush → webhook de arriba. Variable de voz: `texto_voz`.
-5. Rebuild VPS si el front no tiene el formulario nuevo:
+1. Leer este archivo (y el canvas de chequeo si está abierto).
+2. SSH VPS `root@72.60.127.160` y rebuild:
    ```bash
    cd /opt/HairyPetShop
+   git pull
    docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
    ```
-6. Printify / Groq / Stripe / PayPal en health si siguen en `false`.
-7. n8n Render: borrar CNAME `n8n` y el servicio (ahorra Render, no disco del VPS).
-8. TaxiDriver: probar el cerrador de altas cuando Hairy llame bien.
+   Antes hace falta **push** desde el PC (`main` va 2 commits por delante).
+3. En `backend/.env` del VPS (no en el chat): `GROQ_API_KEY`, `MUNDOSMS_USER`, `MUNDOSMS_PASSWORD`, `MUNDOSMS_NUMBER=34848681101`, `MUNDOSMS_VOICE_WEBHOOK=https://hairyelbicho.com/api/voice/mundosms`. Recrear el contenedor API.
+4. Health esperado: `groq: true`, `mundosms: true`, `voice_from` con el 848.
+5. Panel MundoSMS: HTTP VozPush → ese webhook. Variable: `texto_voz`.
+6. Probar «Llámame ahora» en el home.
+7. Printify / Stripe / PayPal si siguen en `false`.
+8. n8n Render: borrar CNAME `n8n` y el servicio.
+9. TaxiDriver: cerrador de altas cuando Hairy llame bien.
 
 Detalle DNS: `deploy/HOSTINGER-DNS.md`
 

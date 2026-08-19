@@ -70,11 +70,11 @@ export default function NotFound() {
               <span>Partners</span>
             </Link>
             <Link
-              to="/automation-dashboard"
+              to="/hairy-home"
               className="text-blue-600 hover:text-blue-700 transition-colors cursor-pointer flex items-center space-x-1"
             >
-              <i className="ri-robot-line"></i>
-              <span>Automatización</span>
+              <i className="ri-home-heart-line"></i>
+              <span>Hairy Home</span>
             </Link>
             <Link
               to="/hairy-tools"

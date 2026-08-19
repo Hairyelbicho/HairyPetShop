@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function MatrizBar({ product = 'HairyPetShop' }: { product?: string }) {
   return (
     <div className="border-t border-gray-800 mt-8 pt-8">
@@ -20,6 +22,14 @@ export default function MatrizBar({ product = 'HairyPetShop' }: { product?: stri
           </p>
           <p className="text-gray-500 text-sm mt-3">
             © 2026 <span className="font-bold text-gray-300">Arkadium88 Holdings SL</span>. Todos los derechos reservados.
+          </p>
+          <p className="mt-3">
+            <Link
+              to="/automation-dashboard"
+              className="text-[10px] text-gray-600 hover:text-gray-400 tracking-wide"
+            >
+              Acceso interno
+            </Link>
           </p>
         </div>
         <a

@@ -14,10 +14,6 @@ export default function MainNav() {
       <Link to="/sobre-nosotros" className={linkClass}>
         Sobre nosotros
       </Link>
-      <Link to="/automation-dashboard" className={`${linkClass} flex items-center space-x-1`}>
-        <i className="ri-robot-line"></i>
-        <span>Automatización</span>
-      </Link>
       <Link to="/hairy-home" className={linkClass}>
         Hairy Home
       </Link>
